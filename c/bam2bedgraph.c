@@ -2,21 +2,12 @@
 #include <getopt.h>
 #include <stdlib.h>
 #include <string.h>
-#include "htslib/sam.h"
+#include "bam_access.h"
 
 static char *input_file = NULL;
 static char *output_file = NULL;
 static char *region = NULL;
 static int filter = 0;
-
-typedef struct {
-  uint32_t ltid;
-  int      lstart,lcoverage,lpos,beg,end;
-  htsFile *in;
-  hts_idx_t *idx;
-	bam_hdr_t *head;
-	FILE *out;
-} tmpstruct_t;
 
 void print_version (int exit_code){
   printf ("%s\n",VERSION);
@@ -122,8 +113,7 @@ void options(int argc, char *argv[]){
 }
 
 // callback for bam_plbuf_init()
-static int pileup_func(uint32_t tid, uint32_t position, int n, const bam_pileup1_t *pl, void *data)
-{
+static int pileup_func(uint32_t tid, uint32_t position, int n, const bam_pileup1_t *pl, void *data){
   tmpstruct_t *tmp = (tmpstruct_t*)data;
   int pos          = (int)position;
   int coverage     = n;
@@ -145,84 +135,27 @@ static int pileup_func(uint32_t tid, uint32_t position, int n, const bam_pileup1
 int main(int argc, char *argv[]){
 	options(argc, argv);
   tmpstruct_t tmp;
-  bam_plp_t buf = NULL;
-	bam1_t *b = NULL;
-  hts_itr_t *iter = NULL;
-  tmp.beg = 0; tmp.end = 0x7fffffff;
-	tmp.lstart    = 0;
-	tmp.lcoverage = 0;
-	tmp.ltid      = 0;
-	tmp.lpos      = 0;
-
+  FILE *out = NULL;
 	if (strcmp(output_file,"-")==0) {
-    tmp.out = stdout;
+    out = stdout;
   } else {
-    tmp.out = fopen(output_file,"w");
+    out = fopen(output_file,"w");
   }
-	if(tmp.out == NULL){
-	  fprintf(stderr,"Failed to open output file for %s writing.",output_file);
-	  return 1;
-	}
-  tmp.in = hts_open(input_file, "r");
-  if (tmp.in == 0) {
-		fprintf(stderr, "Fail to open [CR|B]AM file %s\n", input_file);
-		return 1;
-	}
-  tmp.head = sam_hdr_read(tmp.in);
-  buf = bam_plp_init(0,0);
-  //Iterate through each read in bam file.
-  b = bam_init1();
+  check(out!=NULL,"Failed to open output file for %s writing.",output_file);
+  tmp.out = out;
 	if(region == NULL){
-	  tmp.idx=NULL;
-    int reto;
-    while((reto = sam_read1(tmp.in, tmp.head, b)) >= 0){
-      if((b->core.flag & filter)>0) continue; //Skip if this is a filtered read
-      int ret, n_plp, tid, pos;
-      const bam_pileup1_t *plp;
-      ret = bam_plp_push(buf, b);
-      if (ret < 0) break;
-      while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != 0)
-          pileup_func(tid, pos, n_plp, plp, &tmp);
-    }
-    bam_plp_push(buf,0);
+	  process_bam_file(input_file,pileup_func, &tmp,filter,NULL);
 	}else{
-
-	  tmp.idx = sam_index_load(tmp.in,input_file);
-    if (tmp.idx == 0) {
-		  fprintf(stderr, "Fail to open [CR|B]AM index for file %s\n", input_file);
-		  return 1;
-	  }
-    iter = sam_itr_querys(tmp.idx, tmp.head, region);
-    int result;
-    while ((result = sam_itr_next(tmp.in, iter, b)) >= 0) {
-      if((b->core.flag & filter)>0) continue; //Skip if this is a filtered read
-      int ret, n_plp, tid, pos;
-      const bam_pileup1_t *plp;
-      ret = bam_plp_push(buf, b);
-      if (ret < 0) break;
-      while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != 0){
-          pileup_func(tid, pos, n_plp, plp, &tmp);
-      }
-    }
-    bam_plp_push(buf,0);
+    process_bam_region(input_file, pileup_func, &tmp, filter, region,NULL);
 	}
+  fprintf(out,"%s\t%d\t%d\t%d\n", tmp.head->target_name[tmp.ltid], tmp.lstart,tmp.lpos+1, tmp.lcoverage);
 
-  //Check we've written everything...
-	int n_plp, tid, pos;
-  const bam_pileup1_t *plp;
-  while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != 0){
-    pileup_func(tid, pos, n_plp, plp, &tmp);
-  }
-
-  fprintf(tmp.out,"%s\t%d\t%d\t%d\n", tmp.head->target_name[tmp.ltid], tmp.lstart,tmp.lpos+1, tmp.lcoverage);
-  bam_plp_destroy(buf);
-  bam_destroy1(b);
-  fflush(tmp.out);
-  fclose(tmp.out);
-  if(iter) sam_itr_destroy(iter);
-  if(tmp.idx) hts_idx_destroy(tmp.idx);
-	if(tmp.in) hts_close(tmp.in);
-	if(tmp.head) bam_hdr_destroy(tmp.head);
+  fflush(out);
+  fclose(out);
 	return 0;
+
+error:
+  if(out) fclose(out);
+  return -1;
 }
 

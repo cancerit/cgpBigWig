@@ -29,7 +29,7 @@ void print_version (int exit_code){
 }
 
 void print_usage (int exit_code){
-	printf ("Usage: bwcat -i input-file -f genome.fai\n\n");
+	printf ("Usage: bwcat -i input-path\n\n");
 	printf ("-i  --input-path [file]                          Path to the input bigwig file\n\n");
 	printf ("Optional:\n");
 	printf ("-r  --region [string]                            Region or bw file to print to screen format. NB start should be 0 based: (contig:start-stop)\n");
@@ -58,7 +58,7 @@ void setup_options(int argc, char *argv[]){
    int iarg = 0;
 
    //Iterate through options
-   while((iarg = getopt_long(argc, argv, "i:r:o:hv",long_opts, &index)) != -1){
+   while((iarg = getopt_long(argc, argv, "i:r:o:nhv",long_opts, &index)) != -1){
     switch(iarg){
       case 'i':
         input = optarg;
@@ -130,15 +130,15 @@ int main(int argc, char *argv[]){
     uint32_t start,stop;
     int chk = parseRegionString(region,contig,&start,&stop);
     check(chk>0,"Error parsing region string '%s'",region);
-    fprintf(stderr,"%s\t%"PRIu32"\t%"PRIu32"\n",contig,start,stop);
     //retrieve region intervals
-    intervals = bwGetValues(fp, contig, start, stop, inc_na);
+    //intervals = bwGetValues(fp, contig, start, stop, inc_na);
+    intervals = bwGetOverlappingIntervals(fp, contig, start, stop);
     //Iterate through intervals
     if(intervals){
-      int j=0;
+      uint32_t j=0;
       for(j=0;j<intervals->l;j++){
         //print interval
-        fprintf(out,out_pattern,contig,intervals->start[j],intervals->end[j],intervals->value[j]);
+        fprintf(out,out_pattern,contig,(intervals->start)[j],(intervals->end)[j],(intervals->value)[j]);
       }
       bwDestroyOverlappingIntervals(intervals);
     }
@@ -148,22 +148,13 @@ int main(int argc, char *argv[]){
     int i=0;
     //Iterate through each contig
     for(i=0;i<fp->cl->nKeys;i++){
-      //Only retrieve 10kb at a time so we don't use excess.
-      uint32_t end = 10000;
-      uint32_t last = 0;
-      while((last+1)<fp->cl->len[i]){
-        intervals = bwGetValues(fp, fp->cl->chrom[i], last, end, inc_na);
-        if(intervals){
-          int j=0;
-          for(j=0;j<intervals->l;j++){
-            //print interval
-            fprintf(out,out_pattern,intervals->start[j],intervals->end[j],intervals->value[j]);
-          }
-          bwDestroyOverlappingIntervals(intervals);
+      //intervals = bwGetValues(fp, fp->cl->chrom[i], 0, fp->cl->len[i], inc_na);
+      intervals = bwGetOverlappingIntervals(fp, fp->cl->chrom[i], 0, fp->cl->len[i]);
+      if(intervals){
+        int j=0;
+        for(j=0;j<intervals->l;j++){
+          fprintf(out,out_pattern,fp->cl->chrom[i],(intervals->start)[j],(intervals->end)[j],(intervals->value)[j]);
         }
-        last = end-1;
-        end+=10000;
-        if(end>fp->cl->len[i]) end = fp->cl->len[i];
       }
     }
   }

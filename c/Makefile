@@ -24,7 +24,7 @@ prefix=?/usr/local/
 
 #Define locations of header files
 OPTINC?= -I$(HTSLOC)/
-INCLUDES= -I./ $(OPTINC) -rdynamic
+INCLUDES= $(OPTINC) -rdynamic
 
 ifdef LIBBIGWIG
 JOIN_INCLUDES= -I$(LIBBIGWIG)
@@ -38,7 +38,6 @@ CAT_LFLAGS+= -L$(prefix)/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
 LFLAGS?= -L$(HTSTMP)
-LIB_LOCS?=
 
 # define any libraries to link into executable:
 #   if I want to link in libraries (libx.so or libx.a) I use the -llibname
@@ -48,7 +47,7 @@ LIBBWLIBS=-lBigWig -lz -lcurl -lm -lgnutls -ltasn1 -lhogweed -lnettle -lgmp -lp1
 
 # define the C source files
 #SRCS = ./bam_access.c ./bam_stats_output.c ./bam_stats_calcs.c
-SRCS=
+SRCS= ./bam_access.c
 #Define test sources
 TEST_SRC=$(wildcard ./c_tests/*_tests.c)
 TESTS=$(patsubst %.c,%,$(TEST_SRC))
@@ -69,6 +68,7 @@ MD := mkdir
 JOIN_TARGET=../bin/bwjoin
 BAM2BG_TARGET=../bin/bam2bedgraph
 BAM2BW_TARGET=../bin/bam2bw
+BAM2BASES_TARGET=../bin/bam2bwbases
 CAT_TARGET=../bin/bwcat
 
 
@@ -84,19 +84,22 @@ CAT_TARGET=../bin/bwcat
 
 all: clean pre make_htslib_tmp $(BAM2BG_TARGET) $(BAM2BW_TARGET) remove_htslib_tmp $(JOIN_TARGET) $(CAT_TARGET)
 #all: clean pre make_htslib_tmp $(BAM2BG_TARGET) $(BAM2BW_TARGET) test remove_htslib_tmp $(JOIN_TARGET)
-	@echo  bwcat, bwjoin, bam2bedgraph and bam2bw compiled.
+	@echo  bwcat, bwjoin, bam2bedgraph, bam2bw and bam2bwbases compiled.
 
-$(CAT_TARGET):
-	$(CC) $(JOIN_INCLUDES) $(CFLAGS) ./catbw.c $(CAT_LFLAGS) $(LIB_LOCS) $(LIBBWLIBS) -o $(CAT_TARGET)
+$(CAT_TARGET): $(OBJS)
+	$(CC) $(JOIN_INCLUDES) $(CFLAGS) ./catbw.c $(CAT_LFLAGS) $(LIBBWLIBS) -o $(CAT_TARGET)
 
-$(JOIN_TARGET):
-	$(CC) $(JOIN_INCLUDES) $(CFLAGS) ./bwjoin.c $(CAT_LFLAGS) $(LIB_LOCS) $(LIBBWLIBS) -o $(JOIN_TARGET)
+$(JOIN_TARGET): $(OBJS)
+	$(CC) $(JOIN_INCLUDES) $(INCLUDES) $(CFLAGS) ./bwjoin.c $(CAT_LFLAGS) $(LIBBWLIBS) -o $(JOIN_TARGET)
 
-$(BAM2BW_TARGET):
-	$(CC) $(JOIN_INCLUDES) $(INCLUDES) $(CFLAGS) ./bam2bw.c $(CAT_LFLAGS) $(LFLAGS) $(LIB_LOCS) $(LIBBWLIBS) $(LIBS) -o $(BAM2BW_TARGET)
+$(BAM2BW_TARGET): $(OBJS)
+	$(CC) $(JOIN_INCLUDES) $(INCLUDES) $(CFLAGS) ./bam2bw.c $(OBJS) $(CAT_LFLAGS) $(LFLAGS) $(LIBBWLIBS) $(LIBS) -o $(BAM2BW_TARGET)
+
+$(BAM2BASES_TARGET): $(OBJS)
+	$(CC) $(JOIN_INCLUDES) $(INCLUDES) $(CFLAGS) ./bam2bwbases.c $(OBJS) $(CAT_LFLAGS) $(LFLAGS) $(LIBBWLIBS) $(LIBS) -o $(BAM2BASES_TARGET)
 
 $(BAM2BG_TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $(INCLUDES) -o $(BAM2BG_TARGET) $(OBJS) $(LFLAGS) $(LIBS) ./bam2bedgraph.c
+	$(CC) $(CFLAGS) $(JOIN_INCLUDES) $(INCLUDES) ./bam2bedgraph.c $(OBJS) $(LFLAGS) $(LIBS) -o $(BAM2BG_TARGET)
 
 
 #Unit Tests
@@ -137,7 +140,7 @@ valgrind:
 # the rule(a .c file) and $@: the name of the target of the rule (a .o file)
 # (see the gnu make manual section about automatic variables)
 .c.o:
-	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
+	$(CC) $(CFLAGS) $(JOIN_INCLUDES) $(INCLUDES) -c $<  -o $@
 
 clean:
 	@echo clean

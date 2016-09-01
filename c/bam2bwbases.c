@@ -48,8 +48,8 @@ int check_exist(char *fname){
 }
 
 void print_usage (int exit_code){
-	printf("Usage: bam2bw -i input.[b|cr]am -o output.bw\n");
-	printf("bam2bw can be used to generate a bw file of coverage from a [cr|b]am file.\n\n");
+	printf("Usage: bam2bwbases -i input.[b|cr]am -o output.bw\n");
+	printf("bam2bwbases can be used to generate four bw files of per base proportions.\n\n");
 	printf("-i  --input [file]                                Path to the input [b|cr]am file.\n");
 	printf("-F  --filter [int]                                SAM flags to filter. [default: %d]\n",filter);
 	printf("-o  --outfile [file]                              Path to the output .bw file produced. Per base results wiillbe output as four bw files [ACGT].outputname.bw [default:'%s']\n\n",out_file);
@@ -87,7 +87,6 @@ void setup_options(int argc, char *argv[]){
              	{"input", required_argument, 0, 'i'},
              	{"filter", required_argument, 0, 'F'},
              	{"outfile",required_argument, 0, 'o'},
-             	{"base",no_argument, 0, 'b'},
              	{"region",required_argument, 0, 'c'},
              	{"reference",required_argument, 0, 'r'},
              	{"help", no_argument, 0, 'h'},
@@ -100,7 +99,7 @@ void setup_options(int argc, char *argv[]){
    int iarg = 0;
 
    //Iterate through options
-   while((iarg = getopt_long(argc, argv, "F:i:o:c:r:bhv",long_opts, &index)) != -1){
+   while((iarg = getopt_long(argc, argv, "F:i:o:c:r:hv",long_opts, &index)) != -1){
     switch(iarg){
       case 'F':
         if(sscanf(optarg, "%i", &filter) != 1){
@@ -136,9 +135,6 @@ void setup_options(int argc, char *argv[]){
 			case 'r':
 			  reference = optarg;
 			  break;
-			case 'b':
-			  is_base = 1;
-			  break;
 			case '?':
         print_usage (1);
         break;
@@ -152,33 +148,35 @@ void setup_options(int argc, char *argv[]){
     fprintf(stderr,"Required option -i|--input-bam not defined.\n");
     print_usage(1);
   }
-
-  if(is_base && region_store==NULL){
-    fprintf(stderr,"Option -r|--region must be used with the -b|--base option.\n");
-    print_usage(1);
-  }
-
   return;
 }
 
 // callback for bam_plbuf_init()
-static int pileup_func(uint32_t tid, uint32_t position, int n, const bam_pileup1_t *pl, void *data){
+static int perbase_pileup_func(uint32_t tid, uint32_t position, int n, const bam_pileup1_t *pl, void *data){
   tmpstruct_t *tmp = (tmpstruct_t*)data;
-  int pos          = (int)position;
-  int coverage     = n;
+  int pos              = (int)position;
+  int coverage         = n;
+  int base_coverage    = 0;
   int i;
-  for (i=0;i<n;i++)
-    if (pl[i].is_del) coverage--;
-  if (tmp->ltid != tid || tmp->lcoverage != coverage || pos > tmp->lpos+1) {
-    if (tmp->lpos > 0 && tmp->lcoverage > 0){
+  for (i=0;i<n;i++){
+    if (pl[i].is_del){
+      coverage--;
+    }else{
+      if(bam_seqi(bam_get_seq(pl[i].b), pl[i].qpos) == tmp->base_bit) base_coverage++;
+    }
+  }
+  float result = 0;
+  if(base_coverage>0) result = (float)base_coverage / (float) coverage;
+  if(tmp->ltid != tid || tmp->lbaseprop != result || pos > tmp->lpos+1){
+    //if(tmp->lpos > 0){
       uint32_t start =  tmp->lstart;
       uint32_t stop = (tmp->lpos +1);
-      float cvg = (float)tmp->lcoverage;
-      bwAddIntervals(tmp->bwout,&tmp->head->target_name[tmp->ltid],&start,&stop,&cvg,single);
-    }
-    tmp->ltid       = tid;
-    tmp->lstart     = pos;
-    tmp->lcoverage  = coverage;
+      float res = tmp->lbaseprop;
+      bwAddIntervals(tmp->bwout,&tmp->head->target_name[tmp->ltid],&start,&stop,&res,single);
+    //}
+    tmp->ltid          = tid;
+    tmp->lstart        = pos;
+    tmp->lbaseprop     = result;
   }
   tmp->lpos = pos;
   return 0;
@@ -205,6 +203,7 @@ error:
 int main(int argc, char *argv[]){
 	setup_options(argc, argv);
 	tmpstruct_t tmp;
+	tmpstruct_t *perbase = NULL;
 	int no_of_regions = 0;
 	int sq_lines = get_no_of_SQ_lines(input_file);
 	FILE *fp_bed = NULL;
@@ -294,24 +293,52 @@ int main(int argc, char *argv[]){
   res = bwInit(1<<17);
   check(res==0,"Received an error in bwInit");
 
-  tmp.bwout = initialise_bw_output(out_file,chromList);
-  check(tmp.bwout!= NULL,"Error initialising bw output file %s.",out_file);
-  uint32_t start;
-  uint32_t stop;
-  float cvg;
+
+  uint8_t base_bit_list[] = {1,2,4,8};
+  char *base_list[] = {"A","C","G","T"};
+  perbase = malloc(4 * sizeof(tmpstruct_t));
+  check_mem(perbase);
+  int l=0;
+  for(l=0;l<4;l++){
+    perbase[l].lbaseprop = 0;
+    perbase[l].base_bit = base_bit_list[l];
+    char *name = malloc(sizeof(char *) * (strlen(out_file)+3));
+    check_mem(name);
+    memcpy(name,base_list[l],sizeof(char) * strlen(base_list[l]));
+    strcat(name,".");
+    strcat(name,out_file);
+    perbase[l].bwout = initialise_bw_output(name,chromList);
+    check(perbase[l].bwout != NULL,"Error initialising bw output file %s.",name);
+    free(name);
+    perbase[l].
+    perbase[l].beg = 0; perbase[l].end = 0x7fffffff;
+    perbase[l].lstart    = 0;
+    perbase[l].lcoverage = 0;
+    perbase[l].ltid      = 0;
+    perbase[l].lpos      = 0;
+  }
+
+
   //Now we generate the bw info
   int i=0;
 	for(i=0;i<no_of_regions;i++){
-	  process_bam_region(input_file, pileup_func, &tmp, filter,  our_region_list[i], reference);
-	  start =  tmp.lstart;
-    stop = tmp.lpos+1;
-    cvg = tmp.lcoverage;
-    bwAddIntervals(tmp.bwout,&tmp.head->target_name[tmp.ltid],&start,&stop,&cvg,single);
+	  process_bam_region_bases(char *input_file, perbase_pileup_func, perbase, filter,  our_region_list[i], reference);
+    int b=0;
+    for(b=0;b<4;b++){
+      float result = perbase[b].lbaseprop;
+      uint32_t start =  perbase[b].lstart;
+      uint32_t stop = perbase[b].lpos+1;
+      bwAddIntervals(perbase[b].bwout,&perbase[b].head->target_name[perbase[b].ltid],&start,&stop,&result,single);
+    }
+
 	}
-  bwClose(tmp.bwout);
 
+
+  int b=0;
+  for(b=0;b<4;b++){
+    bwClose(perbase[b].bwout);
+  }
   bwCleanup();
-
   int clean=0;
   for(clean=0; clean<sq_lines; clean++){
     if(chromList->chrom){
@@ -321,11 +348,24 @@ int main(int argc, char *argv[]){
   free(chromList->chrom);
   free(chromList->len);
   free(chromList);
+  free(perbase);
   free(our_region_list);
   return 0;
 
 error:
   if(our_region_list) free(our_region_list);
   if(fp_bed) fclose(fp_bed);
+  if(chromList){
+    int clean=0;
+    for(clean=0; clean<sq_lines; clean++){
+      if(chromList->chrom){
+        free(chromList->chrom[clean]);
+      }
+    }
+    free(chromList->chrom);
+    free(chromList->len);
+    free(chromList);
+  }
+  if(perbase) free(perbase);
   return -1;
 }

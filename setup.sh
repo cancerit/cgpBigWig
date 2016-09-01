@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # for bamstats
-SOURCE_HTSLIB="https://github.com/samtools/htslib/archive/1.3.1.tar.gz"
-# for fast merging of per-chr BW files
+SOURCE_HTSLIB="https://github.com/samtools/htslib/releases/download/1.3.1/htslib-1.3.1.tar.bz2"
+#libBigWig - bigwig access library
 SOURCE_LIB_BW="https://github.com/dpryan79/libBigWig/archive/b36da5a06bffcc1b33c369e078b82f84625fd212.tar.gz"
 
 get_distro () {
@@ -40,7 +40,15 @@ if [ "$#" -ne "1" ] ; then
   exit 0
 fi
 
-CPU=1
+CPU=`grep -c ^processor /proc/cpuinfo`
+if [ $? -eq 0 ]; then
+  if [ "$CPU" -gt "6" ]; then
+    CPU=6
+  fi
+else
+  CPU=1
+fi
+echo "Max compilation CPUs set to $CPU"
 
 INST_PATH=$1
 
@@ -58,18 +66,32 @@ cd $INIT_DIR
 SETUP_DIR=$INIT_DIR/install_tmp
 mkdir -p $SETUP_DIR
 
-echo -n "Building htslib ..."
-if [ -e $SETUP_DIR/htslib.success ]; then
-  echo -n " previously installed ...";
+echo -n "Get htslib ..."
+if [ -e $SETUP_DIR/htslibGet.success ]; then
+  echo " already staged ...";
 else
+  echo
   cd $SETUP_DIR
   get_distro "htslib" $SOURCE_HTSLIB
+  touch $SETUP_DIR/htslibGet.success
+fi
+
+echo -n "Building htslib ..."
+if [ -e $SETUP_DIR/htslib.success ]; then
+  echo " previously installed ...";
+else
+  echo
   mkdir -p htslib
-  tar --strip-components 1 -C htslib -zxf htslib.tar.gz
-  make -C htslib -j$CPU
+  tar --strip-components 1 -C htslib -jxf htslib.tar.bz2
+  cd htslib
+  ./configure --enable-plugins --enable-libcurl --prefix=$INST_PATH
+  make -j$CPU
+  make install
+  cd $SETUP_DIR
   touch $SETUP_DIR/htslib.success
 fi
-echo
+
+cd $INIT_DIR
 
 echo -n "Building libBigWig ..."
 if [ -e $SETUP_DIR/libBigWig.success ]; then
@@ -86,6 +108,8 @@ fi
 echo
 
 export HTSLIB="$SETUP_DIR/htslib"
+cd $INIT_DIR
+
 
 echo -n "Building cgpBigWig ..."
 if [ -e $SETUP_DIR/cgpBigWig.success ]; then
@@ -93,7 +117,7 @@ if [ -e $SETUP_DIR/cgpBigWig.success ]; then
 else
   cd $INIT_DIR
   make -C c clean
-  make -C c -j$CPU prefix=$INST_PATH LIB_LOCS="-L/Users/drj/homebrew/lib/"
+  make -C c -j$CPU prefix=$INST_PATH HTSLIB=$SETUP_DIR/htslib
   cp bin/bam2bedgraph $INST_PATH/bin/.
   cp bin/bwjoin $INST_PATH/bin/.
   cp bin/bam2bw $INST_PATH/bin/.
