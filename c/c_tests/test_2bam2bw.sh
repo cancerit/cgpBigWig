@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ../bin/bam2bw -i ../test_data/volvox-sorted.bam -o ../test_data/tmp.bw;
 if [ "$?" != "0" ];
 then

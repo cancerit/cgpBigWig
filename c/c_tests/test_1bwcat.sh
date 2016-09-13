@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ../bin/bwcat -i ../test_data/test.bw > ../test_data/tmp.out;
 if [ "$?" != "0" ];
 then
