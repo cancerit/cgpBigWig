@@ -3,8 +3,10 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <math.h>
+#include <alloca.h>
 #include <inttypes.h>
 #include "bam_access.h"
+#include "utils.h"
 
 char *out_file = "output.bam.bw";
 char *input_file = NULL;
@@ -16,45 +18,19 @@ int is_regions_file = 0;
 uint8_t is_base = 0;
 int filter = 4;
 char base = 0;
+int include_zeroes = 0;
 uint32_t single = 1;
-
-void print_version (int exit_code){
-  printf ("%s\n",VERSION);
-	exit(exit_code);
-}
-
-int line_count (char *file_path){
-  FILE *f = fopen(file_path,"r");
-  int line_count = 0;
-  check(f != NULL, "Error opening file '%s' to count lines.",file_path);
-  char rd[512];
-	while(fgets(rd, 512, f) != NULL){
-    line_count++;
-  }
-  fclose(f);
-  return line_count;
-error:
-  if(f) fclose(f);
-  return -1;
-}
-
-int check_exist(char *fname){
-	FILE *fp;
-	if((fp = fopen(fname,"r"))){
-		fclose(fp);
-		return 1;
-	}
-	return 0;
-}
+char *last_contig = "";
 
 void print_usage (int exit_code){
 	printf("Usage: bam2bw -i input.[b|cr]am -o output.bw\n");
 	printf("bam2bw can be used to generate a bw file of coverage from a [cr|b]am file.\n\n");
 	printf("-i  --input [file]                                Path to the input [b|cr]am file.\n");
 	printf("-F  --filter [int]                                SAM flags to filter. [default: %d]\n",filter);
-	printf("-o  --outfile [file]                              Path to the output .bw file produced. Per base results wiillbe output as four bw files [ACGT].outputname.bw [default:'%s']\n\n",out_file);
+	printf("-o  --outfile [file]                              Path to the output .bw file produced. [default:'%s']\n\n",out_file);
 	printf("Optional: \n");
 	printf("-c  --region [file]                               A samtools style region (contig:start-stop) or a bed file of regions over which to produce the bigwig file\n");
+	printf("-z  --include-zeroes                              Include zero coverage regions as additional entries to the bw file\n");
 	printf("-r  --reference [file]                            Path to reference genome.fa file (required for cram if ref_path cannot be resolved)\n\n");
   printf ("Other:\n");
 	printf("-h  --help                                        Display this usage information.\n");
@@ -87,9 +63,9 @@ void setup_options(int argc, char *argv[]){
              	{"input", required_argument, 0, 'i'},
              	{"filter", required_argument, 0, 'F'},
              	{"outfile",required_argument, 0, 'o'},
-             	{"base",no_argument, 0, 'b'},
              	{"region",required_argument, 0, 'c'},
              	{"reference",required_argument, 0, 'r'},
+             	{"include-zeroes",no_argument, 0, 'z'},
              	{"help", no_argument, 0, 'h'},
              	{"version", no_argument, 0, 'v'},
              	{ NULL, 0, NULL, 0}
@@ -100,7 +76,7 @@ void setup_options(int argc, char *argv[]){
    int iarg = 0;
 
    //Iterate through options
-   while((iarg = getopt_long(argc, argv, "F:i:o:c:r:bhv",long_opts, &index)) != -1){
+   while((iarg = getopt_long(argc, argv, "F:i:o:c:r:zhv",long_opts, &index)) != -1){
     switch(iarg){
       case 'F':
         if(sscanf(optarg, "%i", &filter) != 1){
@@ -136,8 +112,8 @@ void setup_options(int argc, char *argv[]){
 			case 'r':
 			  reference = optarg;
 			  break;
-			case 'b':
-			  is_base = 1;
+			case 'z':
+			  include_zeroes  = 1;
 			  break;
 			case '?':
         print_usage (1);
@@ -170,12 +146,24 @@ static int pileup_func(uint32_t tid, uint32_t position, int n, const bam_pileup1
   for (i=0;i<n;i++)
     if (pl[i].is_del) coverage--;
   if (tmp->ltid != tid || tmp->lcoverage != coverage || pos > tmp->lpos+1) {
-    if (tmp->lpos > 0 && tmp->lcoverage > 0){
+    if ((tmp->inczero == 0 && tmp->lcoverage > 0 ) || tmp->inczero == 1){
+
       uint32_t start =  tmp->lstart;
-      uint32_t stop = (tmp->lpos +1);
+      uint32_t stop;
+      if(tmp->lpos > 0){
+        stop = tmp->lpos +1;
+      }else{
+        tmp->ltid = tid;
+        stop = pos;
+      }
       float cvg = (float)tmp->lcoverage;
-      bwAddIntervals(tmp->bwout,&tmp->head->target_name[tmp->ltid],&start,&stop,&cvg,single);
+      int chck = bwAddIntervals(tmp->bwout,&tmp->head->target_name[tmp->ltid],&start,&stop,&cvg,single);
+      if(chck != 0){
+        fprintf(stderr,"Error adding region to bw '%s:%"PRIu32"-%"PRIu32"\t%f'. TID: %d\tErrno: %d\n",tmp->head->target_name[tmp->ltid],start,stop,cvg,tmp->ltid,chck);
+        exit(1);
+      }
     }
+    //if(tmp->inczero == 1 && tmp->ltid != tid && pos != tmp->head->target_len[tmp->ltid]){
     tmp->ltid       = tid;
     tmp->lstart     = pos;
     tmp->lcoverage  = coverage;
@@ -200,6 +188,24 @@ bigWigFile_t *initialise_bw_output(char *out_file, chromList_t *chromList){
   return fp;
 error:
   return NULL;
+}
+
+char *get_contig_from_region(char *region){
+  int beg = 0;
+  int end = 0;
+  const char *q = hts_parse_reg(region, &beg, &end);
+  char *tmp = (char*)malloc(q - region + 1);
+  strncpy(tmp, region, q - region);
+  tmp[q - region] = 0;
+  return tmp;
+}
+
+uint32_t getContigLength(char *contig,chromList_t *chromList){
+  int i=0;
+  for(i=0;i<chromList->nKeys;i++){
+    if(strcmp(contig,chromList->chrom[i])==0) return chromList->len[i];
+  }
+  return -1;
 }
 
 int main(int argc, char *argv[]){
@@ -296,20 +302,41 @@ int main(int argc, char *argv[]){
 
   tmp.bwout = initialise_bw_output(out_file,chromList);
   check(tmp.bwout!= NULL,"Error initialising bw output file %s.",out_file);
+  tmp.inczero=include_zeroes;
   uint32_t start;
   uint32_t stop;
   float cvg;
   //Now we generate the bw info
+  int chck = 0;
   int i=0;
 	for(i=0;i<no_of_regions;i++){
-	  process_bam_region(input_file, pileup_func, &tmp, filter,  our_region_list[i], reference);
+	  //old last stop != end of cher and szeroes included then we add a final section of zero to the end of the contig){
+	  chck = process_bam_region(input_file, pileup_func, &tmp, filter,  our_region_list[i], reference);
+	  check(chck==1,"Error parsing bam region.");
 	  start =  tmp.lstart;
     stop = tmp.lpos+1;
     cvg = tmp.lcoverage;
-    bwAddIntervals(tmp.bwout,&tmp.head->target_name[tmp.ltid],&start,&stop,&cvg,single);
+    if(start>0) bwAddIntervals(tmp.bwout,&tmp.head->target_name[tmp.ltid],&start,&stop,&cvg,single);
+	  if(include_zeroes == 1){
+	    char *contig = get_contig_from_region(our_region_list[i]);
+	    uint32_t len = getContigLength(contig,chromList);
+	    check(len != -1,"Error fetching length of contig %s.",contig);
+      if(strcmp(contig,last_contig) != 0 && tmp.lstart != len){
+        start = stop;
+        if(stop==1) start = 0;
+        stop = len;
+        float zero = 0;
+        bwAddIntervals(tmp.bwout,&contig,&start,&stop,&zero,single);
+        tmp.lstart = stop;
+        tmp.lcoverage = 0;
+        tmp.lpos = len;
+        tmp.ltid = 0;
+      }
+      free(contig);
+	  }
 	}
-  bwClose(tmp.bwout);
 
+  bwClose(tmp.bwout);
   bwCleanup();
 
   int clean=0;

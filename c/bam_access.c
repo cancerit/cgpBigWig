@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "utils.h"
 #include "bam_access.h"
 
 int build_chromList_from_bam(chromList_t *chromList ,char *bam_loc){
@@ -169,9 +170,6 @@ int process_bam_file(char *input_file, bw_func pileup_func, tmpstruct_t *tmp, in
   bam_destroy1(b);
 
   if(iter) sam_itr_destroy(iter);
-  if(tmp->idx) hts_idx_destroy(tmp->idx);
-	if(tmp->in) hts_close(tmp->in);
-	if(tmp->head) bam_hdr_destroy(tmp->head);
   return 1;
 
 error:
@@ -206,8 +204,12 @@ int process_bam_region_bases(char *input_file, bw_func perbase_pileup_func, tmps
   for(x=0;x<4;x++){
     perbase[x].idx = idx;
     perbase[x].in = file;
+    perbase[x].head = head;
   }
-
+  uint32_t start;
+  uint32_t stop;
+  char *contig = malloc(sizeof(char) * 2048);
+  parseRegionString(region, contig, &start, &stop);
   iter = sam_itr_querys(idx, head, region);
   int result;
   while ((result = sam_itr_next(file, iter, b)) >= 0) {
@@ -217,9 +219,11 @@ int process_bam_region_bases(char *input_file, bw_func perbase_pileup_func, tmps
     ret = bam_plp_push(buf, b);
     if (ret < 0) break;
     while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != 0){
-      int x=0;
-      for(x=0;x<4;x++){
-        perbase_pileup_func(tid, pos, n_plp, plp, &perbase[x]);
+      if(pos >= start-1 && pos <= stop){
+        int x=0;
+        for(x=0;x<4;x++){
+          perbase_pileup_func(tid, pos, n_plp, plp, &perbase[x]);
+        }
       }
     }
   }
@@ -228,9 +232,11 @@ int process_bam_region_bases(char *input_file, bw_func perbase_pileup_func, tmps
 	int n_plp, tid, pos;
   const bam_pileup1_t *plp;
   while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != 0){
-    int x=0;
-    for(x=0;x<4;x++){
-      perbase_pileup_func(tid, pos, n_plp, plp, &perbase[x]);
+    if(pos >= start-1 && pos <= stop){
+      int x=0;
+      for(x=0;x<4;x++){
+        perbase_pileup_func(tid, pos, n_plp, plp, &perbase[x]);
+      }
     }
   }
   bam_plp_destroy(buf);
@@ -239,7 +245,6 @@ int process_bam_region_bases(char *input_file, bw_func perbase_pileup_func, tmps
   if(iter) sam_itr_destroy(iter);
   if(idx) hts_idx_destroy(idx);
 	if(file) hts_close(file);
-	if(head) bam_hdr_destroy(head);
   return 1;
 error:
   if(iter) sam_itr_destroy(iter);
@@ -282,7 +287,7 @@ int process_bam_region(char *input_file, bw_func pileup_func, tmpstruct_t *tmp, 
     ret = bam_plp_push(buf, b);
     if (ret < 0) break;
     while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != 0){
-        pileup_func(tid, pos, n_plp, plp, &tmp);
+        pileup_func(tid, pos, n_plp, plp, tmp);
     }
   }
   bam_plp_push(buf,0);
@@ -290,7 +295,7 @@ int process_bam_region(char *input_file, bw_func pileup_func, tmpstruct_t *tmp, 
 	int n_plp, tid, pos;
   const bam_pileup1_t *plp;
   while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != 0){
-    pileup_func(tid, pos, n_plp, plp, &tmp);
+    pileup_func(tid, pos, n_plp, plp, tmp);
   }
   bam_plp_destroy(buf);
   bam_destroy1(b);
@@ -298,7 +303,6 @@ int process_bam_region(char *input_file, bw_func pileup_func, tmpstruct_t *tmp, 
   if(iter) sam_itr_destroy(iter);
   if(tmp->idx) hts_idx_destroy(tmp->idx);
 	if(tmp->in) hts_close(tmp->in);
-	if(tmp->head) bam_hdr_destroy(tmp->head);
   return 1;
 error:
   if(iter) sam_itr_destroy(iter);

@@ -87,6 +87,7 @@ else
   ./configure --enable-plugins --enable-libcurl --prefix=$INST_PATH
   make -j$CPU
   make install
+  rm -f $INST_PATH/lib/libhts.so*
   cd $SETUP_DIR
   touch $SETUP_DIR/htslib.success
 fi
@@ -122,6 +123,7 @@ else
   cp bin/bwjoin $INST_PATH/bin/.
   cp bin/bam2bw $INST_PATH/bin/.
   cp bin/bwcat $INST_PATH/bin/.
+  cp bin/bam2bwbases $INST_PATH/bin/.
   touch $SETUP_DIR/cgpBigWig.success
   # need to clean up as will clash with other version
   make -C c clean

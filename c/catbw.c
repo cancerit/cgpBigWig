@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <inttypes.h>
 #include "bigWig.h"
+#include "utils.h"
 #include "dbg.h"
 
 
@@ -12,21 +12,6 @@ char *output = NULL;
 char *region = NULL;
 int inc_na = 0;
 char *out_pattern = "%s\t%"PRIu32"\t%"PRIu32"\t%f\n";
-char *region_format = "%[^:]:%"SCNu32"-%"SCNu32"";
-
-int check_exist(char *fname){
-	FILE *fp;
-	if((fp = fopen(fname,"r"))){
-		fclose(fp);
-		return 1;
-	}
-	return 0;
-}
-
-void print_version (int exit_code){
-  printf ("%s\n",VERSION);
-	exit(exit_code);
-}
 
 void print_usage (int exit_code){
 	printf ("Usage: bwcat -i input-path\n\n");
@@ -89,19 +74,13 @@ void setup_options(int argc, char *argv[]){
 
   //Do some checking to ensure required arguments were passed and are accessible files
   if(check_exist(input) != 1){
-    fprintf(stderr,"Input bw filw file %s does not exist.\n",input);
+    fprintf(stderr,"Input bw file %s does not exist.\n",input);
     print_usage(1);
   }
   if(output==NULL || strcmp(output,"/dev/stdout")==0) {
     output = "-";   // we recognise this as a special case
   }
   return;
-}
-
-int parseRegionString(char *region, char *contig, uint32_t *start, uint32_t *stop){
-  int check_parse = sscanf(region,region_format,contig,start,stop);
-  if(check_parse != 3) return 0;
-  return check_parse;
 }
 
 int main(int argc, char *argv[]){
@@ -132,7 +111,7 @@ int main(int argc, char *argv[]){
     check(chk>0,"Error parsing region string '%s'",region);
     //retrieve region intervals
     //intervals = bwGetValues(fp, contig, start, stop, inc_na);
-    intervals = bwGetOverlappingIntervals(fp, contig, start, stop);
+    intervals = bwGetOverlappingIntervals(fp, contig, start-1, stop);
     //Iterate through intervals
     if(intervals){
       uint32_t j=0;

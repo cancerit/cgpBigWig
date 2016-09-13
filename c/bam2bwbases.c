@@ -4,9 +4,11 @@
 #include <stdint.h>
 #include <math.h>
 #include <inttypes.h>
+#include <libgen.h>
 #include "bam_access.h"
+#include "utils.h"
 
-char *out_file = "output.bam.bw";
+char *out_file = NULL;
 char *input_file = NULL;
 char *region_store = NULL;
 char **our_region_list = NULL;
@@ -17,35 +19,6 @@ uint8_t is_base = 0;
 int filter = 4;
 char base = 0;
 uint32_t single = 1;
-
-void print_version (int exit_code){
-  printf ("%s\n",VERSION);
-	exit(exit_code);
-}
-
-int line_count (char *file_path){
-  FILE *f = fopen(file_path,"r");
-  int line_count = 0;
-  check(f != NULL, "Error opening file '%s' to count lines.",file_path);
-  char rd[512];
-	while(fgets(rd, 512, f) != NULL){
-    line_count++;
-  }
-  fclose(f);
-  return line_count;
-error:
-  if(f) fclose(f);
-  return -1;
-}
-
-int check_exist(char *fname){
-	FILE *fp;
-	if((fp = fopen(fname,"r"))){
-		fclose(fp);
-		return 1;
-	}
-	return 0;
-}
 
 void print_usage (int exit_code){
 	printf("Usage: bam2bwbases -i input.[b|cr]am -o output.bw\n");
@@ -148,6 +121,10 @@ void setup_options(int argc, char *argv[]){
     fprintf(stderr,"Required option -i|--input-bam not defined.\n");
     print_usage(1);
   }
+
+  if(out_file == NULL){
+    out_file = "output.bam.bw";
+  }
   return;
 }
 
@@ -172,7 +149,13 @@ static int perbase_pileup_func(uint32_t tid, uint32_t position, int n, const bam
       uint32_t start =  tmp->lstart;
       uint32_t stop = (tmp->lpos +1);
       float res = tmp->lbaseprop;
-      bwAddIntervals(tmp->bwout,&tmp->head->target_name[tmp->ltid],&start,&stop,&res,single);
+      if(start >= tmp->reg_start-1 && stop <= tmp->reg_stop){
+        int chck = bwAddIntervals(tmp->bwout,&tmp->head->target_name[tmp->ltid],&start,&stop,&res,single);
+        if(chck!=0){
+          fprintf(stderr,"Error adding region to bw '%s:%"PRIu32"-%"PRIu32"\t%f'. Error code: %d.\n",tmp->head->target_name[tmp->ltid],start,stop,res,chck);
+          exit(1);
+        }
+      }
     //}
     tmp->ltid          = tid;
     tmp->lstart        = pos;
@@ -202,12 +185,14 @@ error:
 
 int main(int argc, char *argv[]){
 	setup_options(argc, argv);
-	tmpstruct_t tmp;
 	tmpstruct_t *perbase = NULL;
 	int no_of_regions = 0;
 	int sq_lines = get_no_of_SQ_lines(input_file);
 	FILE *fp_bed = NULL;
-	if(region_store){
+	char *dir = NULL;
+  char *fname = NULL;
+	chromList_t *chromList = NULL;
+	if(region_store != NULL){
     if(is_regions_file==1){
       //If we have a bedfile
       no_of_regions = line_count(region_store);
@@ -273,10 +258,8 @@ int main(int argc, char *argv[]){
 	}
 
   check(no_of_regions>0,"Error evaluating regions to parse. None found.");
-
   //Now create a bigwigfile
   //Open file as a bw file
-  chromList_t *chromList = NULL;
   //Generate the list of chromosomes using the bam header.
   chromList = calloc(1, sizeof(chromList_t));
   check_mem(chromList);
@@ -298,19 +281,22 @@ int main(int argc, char *argv[]){
   char *base_list[] = {"A","C","G","T"};
   perbase = malloc(4 * sizeof(tmpstruct_t));
   check_mem(perbase);
+  fname = malloc(sizeof(char) * strlen(out_file) +1 );
+  dir = malloc(sizeof(char) * strlen(out_file) +1 );
+  parse_file_name(dir,fname,out_file);
   int l=0;
   for(l=0;l<4;l++){
     perbase[l].lbaseprop = 0;
     perbase[l].base_bit = base_bit_list[l];
     char *name = malloc(sizeof(char *) * (strlen(out_file)+3));
     check_mem(name);
-    memcpy(name,base_list[l],sizeof(char) * strlen(base_list[l]));
+    strcpy(name,dir);
+    strcat(name,base_list[l]);
     strcat(name,".");
-    strcat(name,out_file);
+    strcat(name,fname);
     perbase[l].bwout = initialise_bw_output(name,chromList);
     check(perbase[l].bwout != NULL,"Error initialising bw output file %s.",name);
     free(name);
-    perbase[l].
     perbase[l].beg = 0; perbase[l].end = 0x7fffffff;
     perbase[l].lstart    = 0;
     perbase[l].lcoverage = 0;
@@ -318,19 +304,40 @@ int main(int argc, char *argv[]){
     perbase[l].lpos      = 0;
   }
 
-
   //Now we generate the bw info
+  int chck = 0;
+  uint32_t sta;
+	uint32_t sto;
+	char *contig = malloc(sizeof(char) * 2048);
   int i=0;
 	for(i=0;i<no_of_regions;i++){
-	  process_bam_region_bases(char *input_file, perbase_pileup_func, perbase, filter,  our_region_list[i], reference);
+	  parseRegionString(our_region_list[i], contig, &sta, &sto);
+	  int k=0;
+    for(k=0;k<4;k++){
+      perbase[k].reg_start = sta;
+      perbase[k].reg_stop = sto;
+    }
+	  chck = process_bam_region_bases(input_file, perbase_pileup_func, perbase, filter,  our_region_list[i], reference);
+	  check(chck==1,"Error processing bam region.");
     int b=0;
     for(b=0;b<4;b++){
       float result = perbase[b].lbaseprop;
-      uint32_t start =  perbase[b].lstart;
+      uint32_t start = perbase[b].lstart;
       uint32_t stop = perbase[b].lpos+1;
-      bwAddIntervals(perbase[b].bwout,&perbase[b].head->target_name[perbase[b].ltid],&start,&stop,&result,single);
+      if(start <= sto-1){
+        if(stop > sto) stop = sto;
+        chck = bwAddIntervals(perbase[b].bwout,&perbase[b].head->target_name[perbase[b].ltid],&start,&stop,&result,single);
+        check(chck==0,"Error adding region to bw '%s:%"PRIu32"-%"PRIu32"\t%f'. TID: %d\tErrno: %d",perbase[b].head->target_name[perbase[b].ltid],start,stop,result,perbase[b].ltid,chck);
+      }
+      if(stop < sto){
+        result = 0.0;
+        start = stop;
+        stop = sto;
+        chck = bwAddIntervals(perbase[b].bwout,&perbase[b].head->target_name[perbase[b].ltid],&start,&stop,&result,single);
+        check(chck==0,"Error adding region to bw '%s:%"PRIu32"-%"PRIu32"\t%f'. TID: %d\tErrno: %d",perbase[b].head->target_name[perbase[b].ltid],start,stop,result,perbase[b].ltid,chck);
+      }
     }
-
+    bam_hdr_destroy(perbase[0].head);
 	}
 
 

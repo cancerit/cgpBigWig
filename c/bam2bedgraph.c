@@ -3,25 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "bam_access.h"
+#include "utils.h"
 
 static char *input_file = NULL;
 static char *output_file = NULL;
 static char *region = NULL;
 static int filter = 0;
-
-void print_version (int exit_code){
-  printf ("%s\n",VERSION);
-	exit(exit_code);
-}
-
-int check_exist(char *fname){
-	FILE *fp;
-	if((fp = fopen(fname,"r"))){
-		fclose(fp);
-		return 1;
-	}
-	return 0;
-}
 
 void print_usage (int exit_code){
 
@@ -143,15 +130,21 @@ int main(int argc, char *argv[]){
   }
   check(out!=NULL,"Failed to open output file for %s writing.",output_file);
   tmp.out = out;
+  int check = 0;
 	if(region == NULL){
-	  process_bam_file(input_file,pileup_func, &tmp,filter,NULL);
+	  check = process_bam_file(input_file,pileup_func, &tmp,filter,NULL);
+	  check(check==1,"Error parsing bam file.");
 	}else{
-    process_bam_region(input_file, pileup_func, &tmp, filter, region,NULL);
+    check = process_bam_region(input_file, pileup_func, &tmp, filter, region,NULL);
+    check(check==1,"Error parsing bam region.");
 	}
   fprintf(out,"%s\t%d\t%d\t%d\n", tmp.head->target_name[tmp.ltid], tmp.lstart,tmp.lpos+1, tmp.lcoverage);
 
   fflush(out);
   fclose(out);
+  if(tmp.idx) hts_idx_destroy(tmp.idx);
+	if(tmp.in) hts_close(tmp.in);
+	if(tmp.head) bam_hdr_destroy(tmp.head);
 	return 0;
 
 error:

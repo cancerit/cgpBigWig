@@ -6,26 +6,13 @@
 #include <libgen.h>
 #include <regex.h>
 #include "bigWig.h"
+#include "utils.h"
 
 char *out_file = "concatenated.bw";
 char *fai = NULL;
 char *path = NULL;
 char *contig_input = NULL;
 int ign_count = 0;
-
-int check_exist(char *fname){
-	FILE *fp;
-	if((fp = fopen(fname,"r"))){
-		fclose(fp);
-		return 1;
-	}
-	return 0;
-}
-
-void print_version (int exit_code){
-  printf ("%s\n",VERSION);
-	exit(exit_code);
-}
 
 void print_usage (int exit_code){
 	printf("Usage: bwjoin -f genome.fai -o output.bw\n\n");
@@ -38,22 +25,6 @@ void print_usage (int exit_code){
 	printf ("-v --version   Prints the version number.\n\n");
 
   exit(exit_code);
-}
-
-int line_count(char *file){
-  FILE *in = fopen(file,"r");
-  if(in==NULL){
-    fprintf(stderr,"Error opening input file %s for line count:%d.\n",file,errno);
-    return -1;
-  }
-  char line [ 5000 ];
-  int line_count=0;
-	while ( fgets(line,sizeof(line),in) != NULL ){
-	  line_count++;
-	}
-	//Close input file
-  fclose(in);
-  return line_count;
 }
 
 void setup_options(int argc, char *argv[]){

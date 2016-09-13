@@ -15,6 +15,9 @@ typedef struct {
 	bigWigFile_t *bwout;
 	float lbaseprop;
 	uint8_t base_bit;
+	uint8_t inczero;
+	uint32_t reg_start;
+	uint32_t reg_stop;
 } tmpstruct_t;
 
 typedef int (*bw_func)(uint32_t tid, uint32_t position, int n, const bam_pileup1_t *pl, void *data);
