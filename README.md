@@ -22,9 +22,13 @@ compilation libraries and tools to be available, most are listed in `INSTALL`.
 ### Programs
 
 [bwcat](#bwcat) - Read the contents of a bigwig (.bw) file
+
 [bwjoin](#bwjoin) - Concatenate bigwig files together
+
 [bam2bw](#bam2bw) - Generate bigwig (.bw) coverage file from bam
+
 [bam2bwbases](#bam2bwbases) - Generate bigwig (.bw) proportion file of each base at a position from bam
+
 [bam2bedgraph](#bam2bedgraph) - Generate a coverage bedgraph from bam
 
 ##### bwcat
