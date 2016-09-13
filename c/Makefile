@@ -157,7 +157,7 @@ valgrind:
 clean:
 	@echo clean
 	$(RM) ./*.o *~ $(BAM2BG_TARGET) $(BAM2BW_TARGET) $(BAM2BASES_TARGET) $(JOIN_TARGET) $(CAT_TARGET) ./tests/tests_log $(TESTS) ./*.gcda ./*.gcov ./*.gcno *.gcda *.gcov *.gcno ./c_tests/*.gcda ./c_tests/*.gcov ./c_tests/*.gcno
-	-rm -rf $(HTSTMP)
+	-rm -rf $(HTSTMP) ../bin
 
 depend: $(SRCS)
 	makedepend $(INCLUDES) $^
