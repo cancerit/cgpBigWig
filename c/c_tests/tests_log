@@ -273,3 +273,8 @@ DEBUG c_tests/utils_tests.c: all_tests:79
 ----- test_line_count
 DEBUG c_tests/utils_tests.c: all_tests:80 
 ----- test_parse_file_name
+DEBUG c_tests/utils_tests.c: main:116 ----- RUNNING: ./c_tests/utils_tests
+DEBUG c_tests/utils_tests.c: all_tests:110 
+----- test_line_count
+DEBUG c_tests/utils_tests.c: all_tests:111 
+----- test_parse_file_name
