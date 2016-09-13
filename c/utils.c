@@ -18,8 +18,6 @@ int check_exist(char *fname){
 
 int parse_file_name( char *dir, char *fname, const char *file){
   char *tmp = alloca(sizeof(char) * strlen(file)+1);
-  memset(dir,0,sizeof(dir));
-  memset(fname,0,sizeof(fname));
   strcpy(tmp, file);
   int total_l = 0;
   if(strncmp(tmp,"./",2)==0){
