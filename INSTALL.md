@@ -18,25 +18,22 @@ setup.sh will install
 ```
 apt-get update && \
 apt-get -y install \
-build-essential zlib1g-dev libncurses5-dev libcurl4-gnutls-dev libssl-dev
-
-
-libexpat1-dev nettle-dev &&\
+build-essential zlib1g-dev libncurses5-dev libcurl4-gnutls-dev libssl-dev nettle-dev &&\
 apt-get clean
 ```
 
-##For Amazon Linux AMI (2016.03.0 x86_64)
+##For Amazon Linux AMI (2016.03.3 x86_64)
 ```
 yum -q -y update && \
 yum -y install \
-make glibc-devel gcc patch ncurses-devel expat-devel perl-core openssl-devel libcurl-devel gnutls-devel libtasn1-devel p11-kit-devel gmp-devel nettle-devel
+make glibc-devel gcc patch ncurses-devel openssl-devel libcurl-devel gnutls-devel libtasn1-devel p11-kit-devel gmp-devel nettle-devel
 ```
 
 **Should nettle-devel not exist**
 Use the following
 
 ```
-yum -q -y install autoconf
+yum -q -y install autoconf ghostscript texinfo-tex
 wget https://git.lysator.liu.se/nettle/nettle/repository/archive.tar.gz?ref=nettle_3.2_release_20160128 -O nettle.tar.gz
 mkdir -p nettle
 tar --strip-components 1 -C nettle -zxf nettle.tar.gz
