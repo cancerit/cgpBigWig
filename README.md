@@ -21,6 +21,12 @@ compilation libraries and tools to be available, most are listed in `INSTALL`.
 
 ### Programs
 
+[bwcat](#bwcat) - Read the contents of a bigwig (.bw) file
+[bwjoin](#bwjoin) - Concatenate bigwig files together
+[bam2bw](#bam2bw) - Generate bigwig (.bw) coverage file from bam
+[bam2bwbases](#bam2bwbases) - Generate bigwig (.bw) proportion file of each base at a position from bam
+[bam2bedgraph](#bam2bedgraph) - Generate a coverage bedgraph from bam
+
 ##### bwcat
 Read the contents of a bw file
 ```
@@ -74,7 +80,7 @@ Other:
 ```
 
 ##### bam2bwbases
-Generate bw proportion file of each base at a positionfrom bam
+Generate bw proportion file of each base at a position from bam
 ```
 Usage: bam2bwbases -i input.[b|cr]am -o output.bw
 bam2bwbases can be used to generate four bw files of per base proportions.
