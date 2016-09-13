@@ -19,8 +19,8 @@ char *test_parse_file_name(){
   char *ddotdir = "../five/test.e";
   char *resdir = NULL;
   char *resname = NULL;
-  resdir = malloc(sizeof(char) * 512);
-  resname = malloc(sizeof(char) * 512);
+  resdir = calloc(1,sizeof(char) * 512);
+  resname = calloc(1,sizeof(char) * 512);
 
   int check = parse_file_name(resdir, resname, nodir);
   mu_assert(strcmp(resname,"test.a")==0,"No directory fname");
@@ -29,8 +29,8 @@ char *test_parse_file_name(){
 
   free(resdir);
   free(resname);
-  resdir = malloc(sizeof(char) * 512);
-  resname = malloc(sizeof(char) * 512);
+  resdir = calloc(1,sizeof(char) * 512);
+  resname = calloc(1,sizeof(char) * 512);
 
   check = parse_file_name(resdir, resname, onedir);
   mu_assert(strcmp("test.b",resname)==0,"One directory fname");
@@ -39,8 +39,8 @@ char *test_parse_file_name(){
 
   free(resdir);
   free(resname);
-  resdir = malloc(sizeof(char) * 512);
-  resname = malloc(sizeof(char) * 512);
+  resdir = calloc(1,sizeof(char) * 512);
+  resname = calloc(1,sizeof(char) * 512);
 
   check = parse_file_name(resdir, resname, multidir);
   mu_assert(strcmp("test.c",resname)==0,"Multi directory fname");
@@ -49,8 +49,8 @@ char *test_parse_file_name(){
 
   free(resdir);
   free(resname);
-  resdir = malloc(sizeof(char) * 512);
-  resname = malloc(sizeof(char) * 512);
+  resdir = calloc(1,sizeof(char) * 512);
+  resname = calloc(1,sizeof(char) * 512);
 
   check = parse_file_name(resdir, resname, dotdir);
   mu_assert(strcmp("test.d",resname)==0,"Dot directory fname");
@@ -59,8 +59,8 @@ char *test_parse_file_name(){
 
   free(resdir);
   free(resname);
-  resdir = malloc(sizeof(char) * 512);
-  resname = malloc(sizeof(char) * 512);
+  resdir = calloc(1,sizeof(char) * 512);
+  resname = calloc(1,sizeof(char) * 512);
 
   check = parse_file_name(resdir, resname, ddotdir);
   mu_assert(strcmp("test.e",resname)==0,"Double Dot directory fname");

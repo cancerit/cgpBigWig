@@ -4,7 +4,7 @@
 `'/install/to/here'` is where you want the bin/lib folders to be created.
 
 setup.sh will install
-- cgpBigWig tools bwjoin, bwcat, bam2bw and bam2bedgraph
+- cgpBigWig tools bwjoin, bwcat, bam2bw, bam2bwbases and bam2bedgraph
 
 #OS:
   This distribution will only work on *NIX type systems at present.
@@ -18,7 +18,10 @@ setup.sh will install
 ```
 apt-get update && \
 apt-get -y install \
-build-essential zlib1g-dev libncurses5-dev libcurl4-gnutls-dev libssl-dev libexpat1-dev nettle-dev &&\
+build-essential zlib1g-dev libncurses5-dev libcurl4-gnutls-dev libssl-dev
+
+
+libexpat1-dev nettle-dev &&\
 apt-get clean
 ```
 

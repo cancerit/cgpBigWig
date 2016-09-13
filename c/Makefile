@@ -101,6 +101,9 @@ $(BAM2BASES_TARGET): $(OBJS)
 $(BAM2BG_TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $(JOIN_INCLUDES) $(INCLUDES) ./bam2bedgraph.c $(OBJS) $(LFLAGS) $(LIBS) -o $(BAM2BG_TARGET)
 
+pre:
+	mkdir ../bin
+
 
 #Unit Tests
 test: $(BAM2BG_TARGET) $(BAM2BW_TARGET) $(BAM2BASES_TARGET) $(JOIN_TARGET) $(CAT_TARGET)
