@@ -1,7 +1,7 @@
 cgpBigWig
 ==============
 
-Package of C scripts for generation of BigWig coverage files
+Package of C scripts for generation of [BigWig](https://genome.ucsc.edu/goldenpath/help/bigWig.html) coverage files
 
 ---
 
@@ -22,6 +22,7 @@ compilation libraries and tools to be available, most are listed in `INSTALL`.
 ### Programs
 
 ##### bwcat
+Read the contents of a bw file
 ```
 Usage: bwcat -i input-path
 
@@ -38,6 +39,7 @@ Other:
 ```
 
 ##### bwjoin
+Concatenate bw files together
 ```
 Usage: bwjoin -f genome.fai -o output.bw
 
@@ -52,6 +54,7 @@ Other:
 ```
 
 ##### bam2bw
+Generate bw coverage file from bam
 ```
 Usage: bam2bw -i input.[b|cr]am -o output.bw
 bam2bw can be used to generate a bw file of coverage from a [cr|b]am file.
@@ -71,6 +74,7 @@ Other:
 ```
 
 ##### bam2bwbases
+Generate bw proportion file of each base at a positionfrom bam
 ```
 Usage: bam2bwbases -i input.[b|cr]am -o output.bw
 bam2bwbases can be used to generate four bw files of per base proportions.
@@ -89,6 +93,7 @@ Other:
 ```
 
 ##### bam2bedgraph
+Generate a coverage bedgraph from bam
 ```
 Usage: bam2bedgraph -i input.[cr|b]am -o file [-r region] [-h] [-v]
 
