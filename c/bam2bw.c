@@ -181,13 +181,7 @@ static int pileup_func(uint32_t tid, uint32_t position, int n, const bam_pileup1
     if ((tmp->inczero == 0 && tmp->lcoverage > 0 ) || tmp->inczero == 1){
 
       uint32_t start =  tmp->lstart;
-      uint32_t stop;
-      if(tmp->lpos > 0){
-        stop = tmp->lpos +1;
-      }else{
-        tmp->ltid = tid;
-        stop = pos;
-      }
+      uint32_t stop = pos;
       float cvg = (float)tmp->lcoverage;
       int chck = bwAddIntervals(tmp->bwout,&tmp->head->target_name[tmp->ltid],&start,&stop,&cvg,single);
       if(chck != 0){
@@ -342,23 +336,30 @@ int main(int argc, char *argv[]){
   int chck = 0;
   int i=0;
 	for(i=0;i<no_of_regions;i++){
-	  //old last stop != end of cher and szeroes included then we add a final section of zero to the end of the contig){
 	  chck = process_bam_region(input_file, pileup_func, &tmp, filter,  our_region_list[i], reference);
 	  check(chck==1,"Error parsing bam region.");
 	  start =  tmp.lstart;
     stop = tmp.lpos+1;
     cvg = tmp.lcoverage;
-    if(start>0) bwAddIntervals(tmp.bwout,&tmp.head->target_name[tmp.ltid],&start,&stop,&cvg,single);
+    if(start>0) {
+      chck = bwAddIntervals(tmp.bwout,&tmp.head->target_name[tmp.ltid],&start,&stop,&cvg,single);
+      check(chck==0,"Error adding bw interval %s:%"PRIu32"-%"PRIu32". TID: %d Error code: %d\n",tmp.head->target_name[tmp.ltid],start,stop,tmp.ltid,chck);
+    }
 	  if(include_zeroes == 1){
-	    char *contig = get_contig_from_region(our_region_list[i]);
+	    uint32_t reg_start;
+	    uint32_t reg_stop;
+	    char *contig = malloc(sizeof(char) * 2048);
+	    parseRegionString(our_region_list[i], contig, &reg_start, &reg_stop);
 	    uint32_t len = getContigLength(contig,chromList);
 	    check(len != -1,"Error fetching length of contig %s.",contig);
-      if(strcmp(contig,last_contig) != 0 && tmp.lstart != len){
+	    //Append end of chromosome if zeroes
+      if(strcmp(contig,last_contig) != 0 && tmp.lstart < reg_stop && tmp.lpos < reg_stop){
         start = stop;
         if(stop==1) start = 0;
-        stop = len;
+        stop = reg_stop;
         float zero = 0;
-        bwAddIntervals(tmp.bwout,&contig,&start,&stop,&zero,single);
+        chck = bwAddIntervals(tmp.bwout,&contig,&start,&stop,&zero,single);
+        check(chck==0,"Error adding bw interval %s:%"PRIu32"-%"PRIu32". Error code: %d\n",contig,start,stop,chck);
         tmp.lstart = stop;
         tmp.lcoverage = 0;
         tmp.lpos = len;

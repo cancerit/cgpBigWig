@@ -1,2 +1,3 @@
 c/*.o
 bin/
+c/c_tests/tests_log

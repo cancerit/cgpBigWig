@@ -250,6 +250,7 @@ int process_bam_region_bases(char *input_file, bw_func perbase_pileup_func, tmps
     const bam_pileup1_t *plp;
     ret = bam_plp_push(buf, b);
     if (ret < 0) break;
+    uint32_t last_pos = 0;
     while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != 0){
       if(pos >= start-1 && pos <= stop){
         int x=0;
@@ -312,6 +313,11 @@ int process_bam_region(char *input_file, bw_func pileup_func, tmpstruct_t *tmp, 
   check(tmp->idx != 0, "Fail to open [CR|B]AM index for file %s\n", input_file);
   iter = sam_itr_querys(tmp->idx, tmp->head, region);
   int result;
+  uint32_t last_pos = 0;
+  uint32_t reg_sta;
+  uint32_t reg_sto;
+  char *contig = malloc(sizeof(char) * 2048);
+  parseRegionString(region, contig, &reg_sta, &reg_sto);
   while ((result = sam_itr_next(tmp->in, iter, b)) >= 0) {
     if((b->core.flag & filter)>0) continue; //Skip if this is a filtered read
     int ret, n_plp, tid, pos;
@@ -319,7 +325,12 @@ int process_bam_region(char *input_file, bw_func pileup_func, tmpstruct_t *tmp, 
     ret = bam_plp_push(buf, b);
     if (ret < 0) break;
     while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != 0){
+        if(pos > last_pos+1 && tmp->inczero == 1){
+          //This is a region of zero coverage then...
+          pileup_func(tmp->ltid, last_pos+1, 0, NULL, tmp); // Pileup call to set next cvg to zero
+        }
         pileup_func(tid, pos, n_plp, plp, tmp);
+        last_pos = pos;
     }
   }
   bam_plp_push(buf,0);
