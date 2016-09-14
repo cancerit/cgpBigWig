@@ -15,7 +15,7 @@ Some of the code included in this package has dependencies on external packages:
 Please see the respective licence for each before use.
 
 Please use `setup.sh` to install the dependencies.  Please be aware that this expects basic C
-compilation libraries and tools to be available, most are listed in `INSTALL`.
+compilation libraries and tools to be available, most are listed in [`INSTALL`](INSTALL.md).
 
 ---
 
