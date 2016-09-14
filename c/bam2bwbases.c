@@ -179,7 +179,7 @@ static int perbase_pileup_func(uint32_t tid, uint32_t position, int n, const bam
   if(tmp->ltid != tid || tmp->lbaseprop != result || pos > tmp->lpos+1){
     //if(tmp->lpos > 0){
       uint32_t start =  tmp->lstart;
-      uint32_t stop = (tmp->lpos +1);
+      uint32_t stop = pos;
       float res = tmp->lbaseprop;
       if(start >= tmp->reg_start-1 && stop <= tmp->reg_stop){
         int chck = bwAddIntervals(tmp->bwout,&tmp->head->target_name[tmp->ltid],&start,&stop,&res,single);
