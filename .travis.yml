@@ -1,0 +1,23 @@
+notifications:
+  slack: wtsi-cgpit:ptUMR1tkNyZJYd9TpGoss8WR
+  email: false
+
+env:
+ - CC=gcc
+
+addons:
+ apt:
+  packages:
+   - build-essential
+   - curl
+   - zlib1g-dev
+   - libncurses5-dev
+   - libcurl4-openssl-dev
+   - libcurl4-gnutls-dev
+   - libssl-dev
+   - nettle-dev
+
+install: true
+
+script:
+ - ./setup.sh ~/wtsi-opt
