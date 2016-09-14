@@ -10,12 +10,9 @@ addons:
   packages:
    - build-essential
    - curl
-   - zlib1g-dev
-   - libncurses5-dev
    - libcurl4-openssl-dev
-   - libcurl4-gnutls-dev
-   - libssl-dev
    - nettle-dev
+   - zlib1g-dev
 
 install: true
 
