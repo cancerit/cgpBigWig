@@ -31,6 +31,8 @@ compilation libraries and tools to be available, most are listed in [`INSTALL`](
 
 [bam2bw](#bam2bw) - Generate bigwig (.bw) coverage file from bam
 
+[bg2bw](#bg2bw) - Generate bigwig (.bw) coverage file from bedgraph (.bed) format
+
 [bam2bwbases](#bam2bwbases) - Generate bigwig (.bw) proportion file of each base at a position from bam
 
 [bam2bedgraph](#bam2bedgraph) - Generate a coverage bedgraph from bam
@@ -85,6 +87,21 @@ Optional:
 Other:
 -h  --help                                        Display this usage information.
 -v  --version                                     Prints the version number.
+```
+
+##### bg2bw
+Generate bw coverage file from bedgraph (.bed) format
+```
+Usage: bg2bw -i input.bed -c chrom.list -o output.bw
+bg2bw can be used to generate a bw file from a bedgraph file.
+
+-i  --input [file]           Path to the input [b|cr]am file.
+-o  --outfile [file]         Path to the output .bw file produced. [default:'output.bw']
+-c  --chromList [file]       Path to chrom.list a .tsv where first two columns are contig name and length.
+
+Other:
+-h  --help                   Display this usage information.
+-v  --version                Prints the version number.
 ```
 
 ##### bam2bwbases
