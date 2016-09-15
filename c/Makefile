@@ -70,6 +70,7 @@ BAM2BG_TARGET=../bin/bam2bedgraph
 BAM2BW_TARGET=../bin/bam2bw
 BAM2BASES_TARGET=../bin/bam2bwbases
 CAT_TARGET=../bin/bwcat
+BG2BW_TARGET=../bin/bg2bw
 make_BW=../bin/makebw
 
 
@@ -83,7 +84,7 @@ make_BW=../bin/makebw
 
 .NOTPARALLEL: test
 
-all: clean pre make_htslib_tmp $(BAM2BG_TARGET) $(BAM2BW_TARGET) $(BAM2BASES_TARGET) remove_htslib_tmp $(JOIN_TARGET) $(CAT_TARGET) test
+all: clean pre make_htslib_tmp $(BAM2BG_TARGET) $(BAM2BW_TARGET) $(BAM2BASES_TARGET) remove_htslib_tmp $(JOIN_TARGET) $(CAT_TARGET) $(BG2BW_TARGET) test
 	@echo  bwcat, bwjoin, bam2bedgraph, bam2bw and bam2bwbases compiled.
 
 $(CAT_TARGET): $(OBJS)
@@ -101,12 +102,16 @@ $(BAM2BASES_TARGET): $(OBJS)
 $(BAM2BG_TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $(JOIN_INCLUDES) $(INCLUDES) ./bam2bedgraph.c $(OBJS) $(LFLAGS) $(LIBS) -o $(BAM2BG_TARGET)
 
+$(BG2BW_TARGET): $(OBJS)
+	$(CC) $(JOIN_INCLUDES) $(INCLUDES) $(CFLAGS) ./bg2bw.c $(OBJS)  $(LFLAGS) $(CAT_LFLAGS) $(LIBS) $(LIBBWLIBS) -o $(BG2BW_TARGET)
+
+
 pre:
 	mkdir ../bin
 
 
 #Unit Tests
-test: $(BAM2BG_TARGET) $(BAM2BW_TARGET) $(BAM2BASES_TARGET) $(JOIN_TARGET) $(CAT_TARGET)
+test: $(BAM2BG_TARGET) $(BAM2BW_TARGET) $(BAM2BASES_TARGET) $(JOIN_TARGET) $(CAT_TARGET) $(BG2BW_TARGET)
 test: CFLAGS += $(JOIN_INCLUDES) $(INCLUDES) -I./ $(OBJS) $(LFLAGS) $(LIBS) $(CAT_LFLAGS)
 test: $(TESTS)
 	sh ./c_tests/runtests.sh
@@ -129,6 +134,9 @@ make_bwcat: $(CAT_TARGET)
 
 make_bwjoin: $(JOIN_TARGET)
 	@echo $(JOIN_TARGET) done
+
+make_bg2bw: $(BG2BW_TARGET)
+	@echo $(BG2BW_TARGET) done
 
 make_htslib_tmp:
 	$(MD) $(HTSTMP)
@@ -156,7 +164,7 @@ valgrind:
 
 clean:
 	@echo clean
-	$(RM) ./*.o *~ $(BAM2BG_TARGET) $(BAM2BW_TARGET) $(BAM2BASES_TARGET) $(JOIN_TARGET) $(CAT_TARGET) ./tests/tests_log $(TESTS) ./*.gcda ./*.gcov ./*.gcno *.gcda *.gcov *.gcno ./c_tests/*.gcda ./c_tests/*.gcov ./c_tests/*.gcno
+	$(RM) ./*.o *~ $(BAM2BG_TARGET) $(BAM2BW_TARGET) $(BG2BW_TARGET) $(BAM2BASES_TARGET) $(JOIN_TARGET) $(CAT_TARGET) ./tests/tests_log $(TESTS) ./*.gcda ./*.gcov ./*.gcno *.gcda *.gcov *.gcno ./c_tests/*.gcda ./c_tests/*.gcov ./c_tests/*.gcno
 	-rm -rf $(HTSTMP) ../bin
 
 depend: $(SRCS)
