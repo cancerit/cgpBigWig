@@ -156,6 +156,7 @@ else
   cp bin/bam2bw $INST_PATH/bin/.
   cp bin/bwcat $INST_PATH/bin/.
   cp bin/bam2bwbases $INST_PATH/bin/.
+  cp bin/bg2bw $INST_PATH/bin/.
   touch $SETUP_DIR/cgpBigWig.success
   # need to clean up as will clash with other version
   make -C c clean
