@@ -5,7 +5,7 @@ Package of C scripts for generation of [BigWig](https://genome.ucsc.edu/goldenpa
 
 | Master | Dev |
 |---|---|
-| [![Build Status](https://travis-ci.org/cancerit/cgpBigWig.svg?branch=master)](https://travis-ci.org/ICGC-TCGA-PanCancer/PCAP-core) |  [![Build Status](https://travis-ci.org/cancerit/cgpBigWig.svg?branch=dev)](https://travis-ci.org/ICGC-TCGA-PanCancer/PCAP-core) |
+| [![Build Status](https://travis-ci.org/cancerit/cgpBigWig.svg?branch=master)](https://travis-ci.org/ICGC-TCGA-PanCancer/PCAP-core) |  [![Build Status](https://travis-ci.org/cancerit/cgpBigWig.svg?branch=develop)](https://travis-ci.org/ICGC-TCGA-PanCancer/PCAP-core) |
 
 ---
 
