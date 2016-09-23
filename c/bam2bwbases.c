@@ -161,7 +161,7 @@ void setup_options(int argc, char *argv[]){
 }
 
 // callback for bam_plbuf_init()
-static int perbase_pileup_func(uint32_t tid, uint32_t position, int n, const bam_pileup1_t *pl, void *data){
+static int perbase_pileup_func(uint32_t tid, uint32_t position, int n, const bam_pileup1_t *pl, void *data, uint32_t reg_start){
   tmpstruct_t *tmp = (tmpstruct_t*)data;
   int pos              = (int)position;
   int coverage         = n;
@@ -176,6 +176,12 @@ static int perbase_pileup_func(uint32_t tid, uint32_t position, int n, const bam
   }
   float result = 0;
   if(base_coverage>0) result = (float)base_coverage / (float) coverage;
+  if((uint32_t)pos == reg_start-1){
+    tmp->ltid       = tid;
+    tmp->lstart     = pos;
+    tmp->lcoverage  = coverage;
+    tmp->lbaseprop  = result;
+  }
   if(tmp->ltid != tid || tmp->lbaseprop != result || pos > tmp->lpos+1){
     //if(tmp->lpos > 0){
       uint32_t start =  tmp->lstart;

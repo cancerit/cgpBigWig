@@ -54,11 +54,13 @@ typedef struct {
 
 typedef int (*bw_func)(uint32_t tid, uint32_t position, int n, const bam_pileup1_t *pl, void *data);
 
+typedef int (*bw_func_reg)(uint32_t tid, uint32_t position, int n, const bam_pileup1_t *pl, void *data, uint32_t reg_start);
+
 int process_bam_file(char *input_file, bw_func func, tmpstruct_t *tmp, int filter, char *ref);
 
-int process_bam_region(char *input_file, bw_func func, tmpstruct_t *tmp, int filter, char *region, char *ref);
+int process_bam_region(char *input_file, bw_func_reg func, tmpstruct_t *tmp, int filter, char *region, char *ref);
 
-int process_bam_region_bases(char *input_file, bw_func func, tmpstruct_t *tmp, int filter, char *region, char *ref);
+int process_bam_region_bases(char *input_file, bw_func_reg func, tmpstruct_t *tmp, int filter, char *region, char *ref);
 
 int get_no_of_SQ_lines(char *input_file);
 
