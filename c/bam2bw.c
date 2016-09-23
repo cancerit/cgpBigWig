@@ -170,24 +170,25 @@ void setup_options(int argc, char *argv[]){
 }
 
 // callback for bam_plbuf_init()
-static int pileup_func(uint32_t tid, uint32_t position, int n, const bam_pileup1_t *pl, void *data){
+static int pileup_func(uint32_t tid, uint32_t position, int n, const bam_pileup1_t *pl, void *data, uint32_t reg_start){
   tmpstruct_t *tmp = (tmpstruct_t*)data;
   int pos          = (int)position;
   int coverage     = n;
   int i;
   for (i=0;i<n;i++)
     if (pl[i].is_del) coverage--;
+  if((uint32_t)pos == reg_start-1){
+    tmp->ltid       = tid;
+    tmp->lstart     = pos;
+    tmp->lcoverage  = coverage;
+  }
   if (tmp->ltid != tid || tmp->lcoverage != coverage || pos > tmp->lpos+1) {
-    if ((tmp->inczero == 0 && tmp->lcoverage > 0 ) || tmp->inczero == 1){
-
+    if (tmp->inczero == 1 || tmp->lcoverage > 0 ){
       uint32_t start =  tmp->lstart;
       uint32_t stop = pos;
       float cvg = (float)tmp->lcoverage;
       int chck = bwAddIntervals(tmp->bwout,&tmp->head->target_name[tmp->ltid],&start,&stop,&cvg,single);
-      if(chck != 0){
-        fprintf(stderr,"Error adding region to bw '%s:%"PRIu32"-%"PRIu32"\t%f'. TID: %d\tErrno: %d\n",tmp->head->target_name[tmp->ltid],start,stop,cvg,tmp->ltid,chck);
-        exit(1);
-      }
+      check(chck==0,"Error adding bw interval %s:%"PRIu32"-%"PRIu32" = %f . Error code: %d",tmp->head->target_name[tmp->ltid],start,stop,cvg,chck);
     }
     //if(tmp->inczero == 1 && tmp->ltid != tid && pos != tmp->head->target_len[tmp->ltid]){
     tmp->ltid       = tid;
@@ -196,6 +197,8 @@ static int pileup_func(uint32_t tid, uint32_t position, int n, const bam_pileup1
   }
   tmp->lpos = pos;
   return 0;
+error:
+  return 1;
 }
 
 bigWigFile_t *initialise_bw_output(char *out_file, chromList_t *chromList){
@@ -353,7 +356,7 @@ int main(int argc, char *argv[]){
 	    uint32_t len = getContigLength(contig,chromList);
 	    check(len != -1,"Error fetching length of contig %s.",contig);
 	    //Append end of chromosome if zeroes
-      if(strcmp(contig,last_contig) != 0 && tmp.lstart < reg_stop && tmp.lpos < reg_stop){
+      if(strcmp(contig,last_contig) != 0 && tmp.lstart < reg_stop && tmp.lpos < reg_stop-1){
         start = stop;
         if(stop==1) start = 0;
         stop = reg_stop;

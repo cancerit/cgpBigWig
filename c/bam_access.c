@@ -181,22 +181,23 @@ int process_bam_file(char *input_file, bw_func pileup_func, tmpstruct_t *tmp, in
   b = bam_init1();
   tmp->idx=NULL;
   int reto;
+  int n_plp, tid, pos;
+  const bam_pileup1_t *plp;
+  int chck;
   while((reto = sam_read1(tmp->in, tmp->head, b)) >= 0){
     if((b->core.flag & filter)>0) continue; //Skip if this is a filtered read
-    int ret, n_plp, tid, pos;
-    const bam_pileup1_t *plp;
+    int ret;
     ret = bam_plp_push(buf, b);
     if (ret < 0) break;
-    while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != 0)
-        pileup_func(tid, pos, n_plp, plp, tmp);
+    while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != 0){
+      chck = pileup_func(tid, pos, n_plp, plp, tmp);
+      check(chck==0,"Error running pileup function.");
+    }
   }
   bam_plp_push(buf,0);
-
-  //Check we've written everything...
-	int n_plp, tid, pos;
-  const bam_pileup1_t *plp;
   while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != 0){
-    pileup_func(tid, pos, n_plp, plp, tmp);
+    chck = pileup_func(tid, pos, n_plp, plp, tmp);
+    check(chck==0,"Error running pileup function.");
   }
   bam_plp_destroy(buf);
   bam_destroy1(b);
@@ -213,7 +214,7 @@ error:
   return -1;
 }
 
-int process_bam_region_bases(char *input_file, bw_func perbase_pileup_func, tmpstruct_t *perbase, int filter, char *region, char *reference){
+int process_bam_region_bases(char *input_file, bw_func_reg perbase_pileup_func, tmpstruct_t *perbase, int filter, char *region, char *reference){
   bam_plp_t buf = NULL;
 	bam1_t *b = NULL;
   hts_itr_t *iter = NULL;
@@ -232,45 +233,66 @@ int process_bam_region_bases(char *input_file, bw_func perbase_pileup_func, tmps
   b = bam_init1();
   idx = sam_index_load(file,input_file);
   check(idx != 0, "Fail to open [CR|B]AM index for file %s\n", input_file);
+
+  uint32_t last_pos = 0;
+  uint32_t start;
+  uint32_t stop;
+  char *contig = malloc(sizeof(char) * 2048);
+  parseRegionString(region, contig, &start, &stop);
   int x=0;
   for(x=0;x<4;x++){
     perbase[x].idx = idx;
     perbase[x].in = file;
     perbase[x].head = head;
+    if(start>1){
+     perbase[x].lstart=start-1;
+     perbase[x].lpos=start-1;
+     last_pos = start-1;
+    }
   }
-  uint32_t start;
-  uint32_t stop;
-  char *contig = malloc(sizeof(char) * 2048);
-  parseRegionString(region, contig, &start, &stop);
   iter = sam_itr_querys(idx, head, region);
   int result;
+  const bam_pileup1_t *plp;
+  int ret, n_plp, tid, pos, chck;
   while ((result = sam_itr_next(file, iter, b)) >= 0) {
     if((b->core.flag & filter)>0) continue; //Skip if this is a filtered read
-    int ret, n_plp, tid, pos;
-    const bam_pileup1_t *plp;
     ret = bam_plp_push(buf, b);
     if (ret < 0) break;
-    uint32_t last_pos = 0;
     while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != 0){
-      if(pos >= start-1 && pos <= stop){
+      if(pos<start-1) continue;
+      if(pos > last_pos+1){
         int x=0;
         for(x=0;x<4;x++){
-          perbase_pileup_func(tid, pos, n_plp, plp, &perbase[x]);
+          chck = perbase_pileup_func(perbase[x].ltid, (last_pos+1), 0, NULL, &perbase[x], start);
+          check(chck==0,"Error running per base pileup.");
         }
       }
+      int x=0;
+      for(x=0;x<4;x++){
+        chck = perbase_pileup_func(tid, pos, n_plp, plp, &perbase[x],start);
+        check(chck==0,"Error running per base pileup.");
+      }
+      last_pos = pos;
+      if(pos==stop) break;
     }
   }
   bam_plp_push(buf,0);
-  //Check we've written everything...
-	int n_plp, tid, pos;
-  const bam_pileup1_t *plp;
   while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != 0){
-    if(pos >= start-1 && pos <= stop){
+    if(pos<start-1) continue;
+    if(pos > last_pos+1){
       int x=0;
       for(x=0;x<4;x++){
-        perbase_pileup_func(tid, pos, n_plp, plp, &perbase[x]);
+        chck = perbase_pileup_func(perbase[x].ltid, (last_pos+1), 0, NULL, &perbase[x], start);
+        check(chck==0,"Error running per base pileup.");
       }
     }
+    int x=0;
+    for(x=0;x<4;x++){
+      chck = perbase_pileup_func(tid, pos, n_plp, plp, &perbase[x],start);
+      check(chck==0,"Error running per base pileup.");
+    }
+    last_pos = pos;
+    if(pos==stop) break;
   }
   bam_plp_destroy(buf);
   bam_destroy1(b);
@@ -287,7 +309,7 @@ error:
   return -1;
 }
 
-int process_bam_region(char *input_file, bw_func pileup_func, tmpstruct_t *tmp, int filter, char *region, char *reference){
+int process_bam_region(char *input_file, bw_func_reg pileup_func, tmpstruct_t *tmp, int filter, char *region, char *reference){
 
   bam_plp_t buf = NULL;
 	bam1_t *b = NULL;
@@ -318,27 +340,44 @@ int process_bam_region(char *input_file, bw_func pileup_func, tmpstruct_t *tmp, 
   uint32_t reg_sto;
   char *contig = malloc(sizeof(char) * 2048);
   parseRegionString(region, contig, &reg_sta, &reg_sto);
+  if(reg_sta>1){
+   tmp->lstart=reg_sta-1;
+   tmp->lpos=reg_sta-1;
+   last_pos = reg_sta-1;
+  }
+  const bam_pileup1_t *plp;
+  int ret, n_plp, tid, pos, chck;
   while ((result = sam_itr_next(tmp->in, iter, b)) >= 0) {
     if((b->core.flag & filter)>0) continue; //Skip if this is a filtered read
-    int ret, n_plp, tid, pos;
-    const bam_pileup1_t *plp;
     ret = bam_plp_push(buf, b);
     if (ret < 0) break;
-    while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != 0){
-        if(pos > last_pos+1 && tmp->inczero == 1){
-          //This is a region of zero coverage then...
-          pileup_func(tmp->ltid, last_pos+1, 0, NULL, tmp); // Pileup call to set next cvg to zero
-        }
-        pileup_func(tid, pos, n_plp, plp, tmp);
-        last_pos = pos;
+    while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != NULL){
+      if(pos<reg_sta-1) continue;
+      if(pos > last_pos+1){// && tmp->inczero == 1){
+        //This is a region of zero coverage then...
+        chck = pileup_func(tmp->ltid, (last_pos+1), 0, NULL, tmp, reg_sta); // Pileup call to set next cvg to zero
+        check(chck==0,"Error running per base pileup.");
+      }
+      chck = pileup_func(tid, pos, n_plp, plp, tmp, reg_sta);
+      check(chck==0,"Error running per base pileup.");
+      last_pos = pos;
+      if(pos==reg_sto) break;
     }
+
   }
   bam_plp_push(buf,0);
-  //Check we've written everything...
-	int n_plp, tid, pos;
-  const bam_pileup1_t *plp;
-  while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != 0){
-    pileup_func(tid, pos, n_plp, plp, tmp);
+
+  while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != NULL){
+    if(pos<reg_sta-1) continue;
+    if(pos > last_pos+1){// && tmp->inczero == 1){
+      //This is a region of zero coverage then...
+      chck = pileup_func(tmp->ltid, (last_pos+1), 0, NULL, tmp, reg_sta); // Pileup call to set next cvg to zero
+      check(chck==0,"Error running per base pileup.");
+    }
+    chck = pileup_func(tid, pos, n_plp, plp, tmp, reg_sta);
+    check(chck==0,"Error running per base pileup.");
+    last_pos = pos;
+    if(pos==reg_sto) break;
   }
   bam_plp_destroy(buf);
   bam_destroy1(b);
