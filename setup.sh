@@ -65,22 +65,28 @@ get_file () {
   fi
 }
 
-set -e
-
 if [ "$#" -ne "1" ] ; then
   echo "Please provide an installation path  such as /opt/ICGC"
   exit 0
 fi
 
-CPU=`grep -c ^processor /proc/cpuinfo`
+CPU=1
+ls /proc/cpuinfo >& /dev/null # very noddy attempt to figure out thread count
 if [ $? -eq 0 ]; then
-  if [ "$CPU" -gt "6" ]; then
-    CPU=6
-  fi
+  CPU=`grep -c ^processor /proc/cpuinfo`
 else
-  CPU=1
+  CPU=`sysctl -a | grep machdep.cpu | grep thread_count | awk '{print $2}'`
+  if [ $? -ne 0 ]; then
+    # fall back to unthreaded core test
+    CPU=`sysctl -a | grep machdep.cpu | grep core_count | awk '{print $2}'`
+  fi
+fi
+if [ "$CPU" -gt "6" ]; then
+  CPU=6
 fi
 echo "Max compilation CPUs set to $CPU"
+
+set -e
 
 INST_PATH=$1
 
