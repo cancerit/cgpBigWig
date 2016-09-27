@@ -12,8 +12,6 @@ setup.sh will install
 #Other Software
   For installation to proceed you require the following packages:
 
-
-
 ##For Ubuntu (tested with 14.04)
 ```
 apt-get update && \
@@ -45,4 +43,21 @@ sudo make check && \
 sudo make install && \
 cd .. && \
 rm -rf nettle nettle.tar.gz
+```
+
+##OSX
+  In order for cgpBigWig to install you may need the following packages installed
+```
+brew install gnutls
+# fixes gnutls include
+export LIBRARY_PATH="$HOME/homebrew/lib"
+export LDFLAGS="-L$HOME/homebrew/opt/libffi/lib"
+export PKG_CONFIG_PATH="$HOME/homebrew/opt/libffi/lib/pkgconfig"
+brew install libffi
+# from https://p11-glue.freedesktop.org/doc/p11-kit/devel-building.html
+wget https://p11-glue.freedesktop.org/releases/p11-kit-0.23.2.tar.gz
+tar zxf p11-kit-0.23.2.tar.gz
+cd p11-kit-0.23.2
+./configure --prefix=$HOME/local --without-trust-paths
+make
 ```
