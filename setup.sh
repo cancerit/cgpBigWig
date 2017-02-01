@@ -33,9 +33,9 @@
 ###########################
 
 # for bamstats
-SOURCE_HTSLIB="https://github.com/samtools/htslib/releases/download/1.3.1/htslib-1.3.1.tar.bz2"
+SOURCE_HTSLIB="https://github.com/samtools/htslib/releases/download/1.3.2/htslib-1.3.2.tar.bz2"
 #libBigWig - bigwig access library
-SOURCE_LIB_BW="https://github.com/dpryan79/libBigWig/archive/b36da5a06bffcc1b33c369e078b82f84625fd212.tar.gz"
+SOURCE_LIB_BW="https://github.com/dpryan79/libBigWig/archive/0.1.7.tar.gz"
 
 get_distro () {
   EXT=""
