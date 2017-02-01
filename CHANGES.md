@@ -1,3 +1,7 @@
+### 0.3.1
+* Changes HTSlib to 1.3.2 (bringing all stack in line)
+* Changed libBigWig archive get to use release rather than commit id (actually the same but harder to tell which release it is)
+
 ### 0.3.0
 * Changes to setup.sh to permit OSX installation
 
