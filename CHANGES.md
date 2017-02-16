@@ -1,3 +1,6 @@
+### 0.4.0
+* Added detectExtremeDepth code. Replaces functionality in PCAP-core detectExtremeDepth.pl
+
 ### 0.3.1
 * Changes HTSlib to 1.3.2 (bringing all stack in line)
 * Changed libBigWig archive get to use release rather than commit id (actually the same but harder to tell which release it is)

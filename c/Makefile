@@ -71,6 +71,7 @@ BAM2BW_TARGET=../bin/bam2bw
 BAM2BASES_TARGET=../bin/bam2bwbases
 CAT_TARGET=../bin/bwcat
 BG2BW_TARGET=../bin/bg2bw
+DEXDEPTH_TARGET=../bin/detectExtremeDepth
 make_BW=../bin/makebw
 
 
@@ -84,8 +85,8 @@ make_BW=../bin/makebw
 
 .NOTPARALLEL: test
 
-all: clean pre make_htslib_tmp $(BAM2BG_TARGET) $(BAM2BW_TARGET) $(BAM2BASES_TARGET) remove_htslib_tmp $(JOIN_TARGET) $(CAT_TARGET) $(BG2BW_TARGET) test
-	@echo  bwcat, bwjoin, bam2bedgraph, bam2bw and bam2bwbases compiled.
+all: clean pre make_htslib_tmp $(BAM2BG_TARGET) $(BAM2BW_TARGET) $(BAM2BASES_TARGET) remove_htslib_tmp $(JOIN_TARGET) $(CAT_TARGET) $(BG2BW_TARGET) $(DEXDEPTH_TARGET) test
+	@echo  bwcat, bwjoin, bam2bedgraph, bam2bw, detectExtremeDepth and bam2bwbases compiled.
 
 $(CAT_TARGET): $(OBJS)
 	$(CC) $(JOIN_INCLUDES) $(INCLUDES) $(CFLAGS) ./catbw.c  $(OBJS)  $(LFLAGS) $(CAT_LFLAGS) $(LIBS) $(LIBBWLIBS) -o $(CAT_TARGET)
@@ -105,13 +106,16 @@ $(BAM2BG_TARGET): $(OBJS)
 $(BG2BW_TARGET): $(OBJS)
 	$(CC) $(JOIN_INCLUDES) $(INCLUDES) $(CFLAGS) ./bg2bw.c $(OBJS)  $(LFLAGS) $(CAT_LFLAGS) $(LIBS) $(LIBBWLIBS) -o $(BG2BW_TARGET)
 
+$(DEXDEPTH_TARGET): $(OBJS)
+	$(CC) $(JOIN_INCLUDES) $(INCLUDES) $(CFLAGS) ./detectExtremeDepth.c $(OBJS)  $(LFLAGS) $(CAT_LFLAGS) $(LIBS) $(LIBBWLIBS) -o $(DEXDEPTH_TARGET)
+
 
 pre:
 	mkdir ../bin
 
 
 #Unit Tests
-test: $(BAM2BG_TARGET) $(BAM2BW_TARGET) $(BAM2BASES_TARGET) $(JOIN_TARGET) $(CAT_TARGET) $(BG2BW_TARGET)
+test: $(BAM2BG_TARGET) $(BAM2BW_TARGET) $(BAM2BASES_TARGET) $(DEXDEPTH_TARGET) $(JOIN_TARGET) $(CAT_TARGET) $(BG2BW_TARGET)
 test: CFLAGS += $(JOIN_INCLUDES) $(INCLUDES) -I./ $(OBJS) $(LFLAGS) $(LIBS) $(CAT_LFLAGS)
 test: $(TESTS)
 	sh ./c_tests/runtests.sh
@@ -138,6 +142,9 @@ make_bwjoin: $(JOIN_TARGET)
 make_bg2bw: $(BG2BW_TARGET)
 	@echo $(BG2BW_TARGET) done
 
+make_detectExtremeDepth: $(DEXDEPTH_TARGET)
+	@echo $(DEXDEPTH_TARGET) done
+
 make_htslib_tmp:
 	$(MD) $(HTSTMP)
 	#Do some magic to ensure we compile with the static libhts.a rather than libhts.so
@@ -149,7 +156,7 @@ remove_htslib_tmp:
 
 copyscript:
 	cp ./scripts/* ./bin/
-	chmod a+x $(BAM2BG_TARGET) $(BAM2BW_TARGET) $(BAM2BASES_TARGET) $(JOIN_TARGET) $(CAT_TARGET)
+	chmod a+x $(BAM2BG_TARGET) $(BAM2BW_TARGET) $(BAM2BASES_TARGET) $(JOIN_TARGET) $(CAT_TARGET) $(DEXDEPTH_TARGET)
 
 valgrind:
 	VALGRIND="valgrind --log-file=/tmp/valgrind-%p.log" $(MAKE)
@@ -164,7 +171,7 @@ valgrind:
 
 clean:
 	@echo clean
-	$(RM) ./*.o *~ $(BAM2BG_TARGET) $(BAM2BW_TARGET) $(BG2BW_TARGET) $(BAM2BASES_TARGET) $(JOIN_TARGET) $(CAT_TARGET) ./tests/tests_log $(TESTS) ./*.gcda ./*.gcov ./*.gcno *.gcda *.gcov *.gcno ./c_tests/*.gcda ./c_tests/*.gcov ./c_tests/*.gcno
+	$(RM) ./*.o *~ $(BAM2BG_TARGET) $(BAM2BW_TARGET) $(BG2BW_TARGET) $(BAM2BASES_TARGET) $(JOIN_TARGET) $(DEXDEPTH_TARGET) $(CAT_TARGET) ./tests/tests_log $(TESTS) ./*.gcda ./*.gcov ./*.gcno *.gcda *.gcov *.gcno ./c_tests/*.gcda ./c_tests/*.gcov ./c_tests/*.gcno
 	-rm -rf $(HTSTMP) ../bin
 
 depend: $(SRCS)
