@@ -1,3 +1,6 @@
+### 0.4.1
+* Updated libBigWig to 0.3.1 - fixes issue with overflow in very large zoom levels
+
 ### 0.4.0
 * Added detectExtremeDepth code. Replaces functionality in PCAP-core detectExtremeDepth.pl
 
