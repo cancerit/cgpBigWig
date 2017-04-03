@@ -1,4 +1,7 @@
 ### 0.4.1
+* Modified parsing of regions to enable names with : in (i.e. GRCh38)
+
+### 0.4.1
 * Updated libBigWig to 0.3.1 - fixes issue with overflow in very large zoom levels
 
 ### 0.4.0

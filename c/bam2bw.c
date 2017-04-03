@@ -219,16 +219,6 @@ error:
   return NULL;
 }
 
-char *get_contig_from_region(char *region){
-  int beg = 0;
-  int end = 0;
-  const char *q = hts_parse_reg(region, &beg, &end);
-  char *tmp = (char*)malloc(q - region + 1);
-  strncpy(tmp, region, q - region);
-  tmp[q - region] = 0;
-  return tmp;
-}
-
 uint32_t getContigLength(char *contig,chromList_t *chromList){
   int i=0;
   for(i=0;i<chromList->nKeys;i++){
@@ -351,8 +341,7 @@ int main(int argc, char *argv[]){
 	  if(include_zeroes == 1){
 	    uint32_t reg_start;
 	    uint32_t reg_stop;
-	    char *contig = malloc(sizeof(char) * 2048);
-	    parseRegionString(our_region_list[i], contig, &reg_start, &reg_stop);
+	    char *contig = parseRegionString(our_region_list[i], &reg_start, &reg_stop);
 	    uint32_t len = getContigLength(contig,chromList);
 	    check(len != -1,"Error fetching length of contig %s.",contig);
 	    //Append end of chromosome if zeroes

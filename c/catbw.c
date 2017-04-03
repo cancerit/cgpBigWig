@@ -137,10 +137,11 @@ int main(int argc, char *argv[]){
 
   if(region!=NULL){
     //Check and parse region
-    char contig[1024]= "";
-    uint32_t start,stop;
-    int chk = parseRegionString(region,contig,&start,&stop);
-    check(chk>0,"Error parsing region string '%s'",region);
+    uint32_t start = 0;
+    uint32_t stop = 0;
+    char *contig = NULL;
+    contig = parseRegionString(region,&start,&stop);
+    check(contig!=NULL,"Error parsing region string '%s'",region);
     //retrieve region intervals
     //intervals = bwGetValues(fp, contig, start, stop, inc_na);
     intervals = bwGetOverlappingIntervals(fp, contig, start-1, stop);
@@ -149,10 +150,12 @@ int main(int argc, char *argv[]){
       uint32_t j=0;
       for(j=0;j<intervals->l;j++){
         //print interval
+        fprintf(stderr,"***INTERVAL****\t%s:%d-%d\n",contig,(intervals->start)[j],(intervals->end)[j]);
         fprintf(out,out_pattern,contig,(intervals->start)[j],(intervals->end)[j],(intervals->value)[j]);
       }
       bwDestroyOverlappingIntervals(intervals);
     }
+    free(contig);
   }else{
     //No region so iterate through each contig listed in the header file
     //Read in the list of chromosomes

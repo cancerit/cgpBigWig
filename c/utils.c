@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <alloca.h>
 #include <inttypes.h>
+#include "htslib/sam.h"
 #include "utils.h"
 
 
@@ -98,8 +99,11 @@ error:
   return -1;
 }
 
-int parseRegionString(char *region, char *contig, uint32_t *start, uint32_t *stop){
-  int check_parse = sscanf(region,region_format,contig,start,stop);
-  if(check_parse != 3) return 0;
-  return check_parse;
+int parseRegionString(char *region, uint32_t *start, uint32_t *stop){
+  const char *q = hts_parse_reg(region, start, stop);
+  char *contig = (char*)malloc(q - region + 1);
+  strncpy(contig, region, q - region);
+  contig[q - region] = 0;
+  *start = *start+1;
+  return contig;
 }
