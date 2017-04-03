@@ -346,10 +346,10 @@ int main(int argc, char *argv[]){
   int chck = 0;
   uint32_t sta;
 	uint32_t sto;
-	char *contig = malloc(sizeof(char) * 2048);
+	char *contig;
   int i=0;
 	for(i=0;i<no_of_regions;i++){
-	  parseRegionString(our_region_list[i], contig, &sta, &sto);
+	  contig = parseRegionString(our_region_list[i], &sta, &sto);
 	  int k=0;
     for(k=0;k<4;k++){
       perbase[k].reg_start = sta;
@@ -375,6 +375,7 @@ int main(int argc, char *argv[]){
         check(chck==0,"Error adding region to bw '%s:%"PRIu32"-%"PRIu32"\t%f'. TID: %d\tErrno: %d",perbase[b].head->target_name[perbase[b].ltid],start,stop,result,perbase[b].ltid,chck);
       }
     }
+    free(contig);
     bam_hdr_destroy(perbase[0].head);
 	}
 

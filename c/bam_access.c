@@ -237,8 +237,7 @@ int process_bam_region_bases(char *input_file, bw_func_reg perbase_pileup_func, 
   uint32_t last_pos = 0;
   uint32_t start;
   uint32_t stop;
-  char *contig = malloc(sizeof(char) * 2048);
-  parseRegionString(region, contig, &start, &stop);
+  char *contig = parseRegionString(region, &start, &stop);
   int x=0;
   for(x=0;x<4;x++){
     perbase[x].idx = idx;
@@ -338,8 +337,7 @@ int process_bam_region(char *input_file, bw_func_reg pileup_func, tmpstruct_t *t
   uint32_t last_pos = 0;
   uint32_t reg_sta;
   uint32_t reg_sto;
-  char *contig = malloc(sizeof(char) * 2048);
-  parseRegionString(region, contig, &reg_sta, &reg_sto);
+  char *contig = parseRegionString(region, &reg_sta, &reg_sto);
   if(reg_sta>1){
    tmp->lstart=reg_sta-1;
    tmp->lpos=reg_sta-1;
