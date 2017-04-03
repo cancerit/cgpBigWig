@@ -85,7 +85,7 @@ make_BW=../bin/makebw
 
 .NOTPARALLEL: test
 
-all: clean pre make_htslib_tmp $(BAM2BG_TARGET) $(BAM2BW_TARGET) $(BAM2BASES_TARGET) remove_htslib_tmp $(JOIN_TARGET) $(CAT_TARGET) $(BG2BW_TARGET) $(DEXDEPTH_TARGET) test
+all: clean pre make_htslib_tmp $(BAM2BG_TARGET) $(BAM2BW_TARGET) $(BAM2BASES_TARGET) $(JOIN_TARGET) $(CAT_TARGET) $(BG2BW_TARGET) $(DEXDEPTH_TARGET) remove_htslib_tmp test
 	@echo  bwcat, bwjoin, bam2bedgraph, bam2bw, detectExtremeDepth and bam2bwbases compiled.
 
 $(CAT_TARGET): $(OBJS)
