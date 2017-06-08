@@ -1,4 +1,7 @@
-### 0.4.1
+### 0.4.3
+* Updated libBigWig to 0.3.4 - fixes #10
+
+### 0.4.2
 * Modified parsing of regions to enable names with : in (i.e. GRCh38)
 
 ### 0.4.1
