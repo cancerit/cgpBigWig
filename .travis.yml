@@ -16,6 +16,7 @@ addons:
       - build-essential
       - curl
       - libcurl4-openssl-dev
+      - libssl-dev
       - nettle-dev
       - zlib1g-dev
 
