@@ -35,11 +35,11 @@ matrix:
       compiler: clang
       os: linux
       sudo: required
-    - dist: xenial
+    - dist: precise
       compiler: gcc
       os: linux
       sudo: required
-    - dist: xenial
+    - dist: precise
       compiler: clang
       os: linux
       sudo: required
