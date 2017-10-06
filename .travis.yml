@@ -18,3 +18,10 @@ install: true
 
 script:
  - ./setup.sh ~/wtsi-opt
+
+ matrix:
+  include:
+    - os: linux
+      dist: Precise
+    - os: linux
+      dist: Trusty
