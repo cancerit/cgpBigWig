@@ -44,6 +44,6 @@ int check_exist(char *fname);
 
 int parse_file_name( char *dir, char *fname, const char *file);
 
-int parseRegionString(char *region, uint32_t *start, uint32_t *stop);
+char *parseRegionString(char *region, uint32_t *start, uint32_t *stop);
 
 #endif

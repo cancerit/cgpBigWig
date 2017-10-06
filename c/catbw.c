@@ -150,7 +150,6 @@ int main(int argc, char *argv[]){
       uint32_t j=0;
       for(j=0;j<intervals->l;j++){
         //print interval
-        fprintf(stderr,"***INTERVAL****\t%s:%d-%d\n",contig,(intervals->start)[j],(intervals->end)[j]);
         fprintf(out,out_pattern,contig,(intervals->start)[j],(intervals->end)[j],(intervals->value)[j]);
       }
       bwDestroyOverlappingIntervals(intervals);
