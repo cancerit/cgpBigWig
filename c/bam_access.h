@@ -35,7 +35,10 @@
 
 #include "dbg.h"
 #include "htslib/sam.h"
+#include "khash.h"
 #include "bigWig.h"
+
+KHASH_SET_INIT_STR(str)
 
 typedef struct {
   uint32_t ltid;
@@ -64,7 +67,9 @@ int process_bam_region_bases(char *input_file, bw_func_reg func, tmpstruct_t *tm
 
 int get_no_of_SQ_lines(char *input_file);
 
-int build_chromList_from_bam(chromList_t *chromList ,char *bam_loc);
+int build_chromList_from_bam(chromList_t *chromList, char *bam_loc);
+
+int build_chromList_from_bam_limit(chromList_t *chromList, char *bam_loc, khash_t(str) *contigs_h);
 
 int parse_SQ_line(char *line, char *name, int *length);
 

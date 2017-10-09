@@ -90,6 +90,67 @@ error:
   return -1;
 }
 
+int build_chromList_from_bam_limit(chromList_t *chromList ,char *bam_loc, khash_t(str) *contigs_h){
+  htsFile *bam =  NULL;
+  char *line = NULL;
+  char *tmp = NULL;
+  bam_hdr_t *header = NULL;
+  char *ptr;
+	bam = hts_open(bam_loc, "r");
+	check(bam != 0,"Bam file %s failed to open to read header.",bam_loc);
+	header = sam_hdr_read(bam);
+	char *head_txt = header->text;
+  line = strtok(head_txt,"\n");
+  int i = 0;
+  khint_t k;
+	while(line != NULL){
+		//Check for a read group line
+		if(strncmp(line,"@SQ",3)==0){
+      char *tag = strtok_r(line,"\t",&ptr);
+      while(tag != NULL){
+        int chk=0;
+        tmp = malloc(sizeof(char) * 512);
+        check_mem(tmp);
+        chk = sscanf(tag,"SN:%[^\t\n]",tmp);
+        if(chk>0){
+          k = kh_get(str, contigs_h, tmp);
+          int is_missing = (k == kh_end(contigs_h));
+          if(is_missing == 0){
+            //Check if this sequence name is included in the contig list.
+            chromList->chrom[i] = malloc(sizeof(char) * (strlen(tmp)+1));
+            check_mem(chromList->chrom[i]);
+            strcpy(chromList->chrom[i],tmp);
+          }
+          tag = strtok_r(NULL,"\t",&ptr);
+          free(tmp);
+          continue;
+        }
+        free(tmp);
+        uint32_t tmpint = 0;
+        chk = sscanf(tag,"LN:%" SCNu32 "",&tmpint);
+        if(chk>0){
+          chromList->len[i] = tmpint;
+          tag = strtok_r(NULL,"\t",&ptr);
+          continue;
+        }
+        tag = strtok_r(NULL,"\t",&ptr);
+      }//End of SQ line tags
+      i++;
+		}//End of if this is an SQ line
+		line = strtok(NULL,"\n");
+	}
+	free(line);
+	bam_hdr_destroy(header);
+	hts_close(bam);
+  return 1;
+error:
+  if(line) free(line);
+	if(bam) hts_close(bam);
+	if(header) bam_hdr_destroy(header);
+	if(tmp) free (tmp);
+  return -1;
+}
+
 int parse_SQ_line(char *line, char *name, int *length){
   char *tag = NULL;
   char *tmp = NULL;
