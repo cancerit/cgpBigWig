@@ -277,7 +277,7 @@ int main(int argc, char *argv[]){
 			char *contig = malloc(sizeof(char)*1024);
 			check_mem(contig);
 			int beg,end;
-			int chk = sscanf(region_store,"%s:%d-%d",contig,&beg,&end);
+			int chk = sscanf(region_store,"%[^:]:%d-%d",contig,&beg,&end);
 			check(chk==3,"Error reading line '%s' from regions bed file.",region_store);
 
 			//Attempt to add contig as key to hash
