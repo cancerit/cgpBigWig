@@ -69,7 +69,7 @@ int get_no_of_SQ_lines(char *input_file);
 
 int build_chromList_from_bam(chromList_t *chromList, char *bam_loc);
 
-int build_chromList_from_bam_limit(chromList_t *chromList, char *bam_loc, khash_t(str) *contigs_h);
+chromList_t *build_chromList_from_bam_limit(char *bam_loc, khash_t(str) *contigs_h);
 
 int parse_SQ_line(char *line, char *name, int *length);
 
