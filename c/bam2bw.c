@@ -333,25 +333,19 @@ int main(int argc, char *argv[]){
   //Open file as a bw file
   chromList_t *chromList = NULL;
   //Generate the list of chromosomes using the bam header.
-  chromList = calloc(1, sizeof(chromList_t));
-  check_mem(chromList);
-  chromList->nKeys = kh_size(contigs_h);
-  chromList->chrom = calloc(kh_size(contigs_h),sizeof(char *));
-  check_mem(chromList->chrom);
-  chromList->len = calloc(kh_size(contigs_h),sizeof(uint32_t));
-  check_mem(chromList->len);
-  //Iterate through the header of the bam file and get all contigs.
-  int res = build_chromList_from_bam_limit(chromList,input_file,contigs_h);
+  chromList = build_chromList_from_bam_limit(input_file,contigs_h);
+	check(chromList != NULL,"Error generating chromList from bam with limits");
+	//fprintf(stderr,"Post build list entries: %d\t%s:%d\n",chromList->nKeys,chromList->chrom[0],chromList->len[0]);
 
 	for (k = 0; k < kh_end(contigs_h); ++k)
 		if (kh_exist(contigs_h, k))
 			free((char*)kh_key(contigs_h, k));
 	kh_destroy(str, contigs_h);
 
-  check(res==1,"Error building chromList from bam header.");
+  check(chromList!=NULL,"Error building chromList from bam header.");
 
   //Initialise bw
-  res = bwInit(1<<17);
+  int res = bwInit(1<<17);
   check(res==0,"Received an error in bwInit");
 
   tmp.bwout = initialise_bw_output(out_file,chromList);
@@ -400,7 +394,7 @@ int main(int argc, char *argv[]){
   bwCleanup();
 
   int clean=0;
-  for(clean=0; clean<sq_lines; clean++){
+  for(clean=0; clean<chromList->nKeys; clean++){
     if(chromList->chrom){
       free(chromList->chrom[clean]);
     }
@@ -421,6 +415,16 @@ error:
 				}
 			}
 			kh_destroy(str, contigs_h);
+	}
+	if(chromList){
+		for(clean=0; clean<sq_lines; clean++){
+	    if(chromList->chrom){
+	      free(chromList->chrom[clean]);
+	    }
+	  }
+	  free(chromList->chrom);
+	  free(chromList->len);
+	  free(chromList);
 	}
   return -1;
 }
