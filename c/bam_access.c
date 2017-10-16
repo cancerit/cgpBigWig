@@ -90,6 +90,88 @@ error:
   return -1;
 }
 
+chromList_t *build_chromList_from_bam_limit(char *bam_loc, khash_t(str) *contigs_h){
+  chromList_t *chromList = NULL;
+  htsFile *bam =  NULL;
+  char *line = NULL;
+  char *tmp = NULL;
+  bam_hdr_t *header = NULL;
+  char *ptr;
+
+  chromList = malloc(sizeof(chromList_t));
+  check_mem(chromList);
+	int size_of_contigs = kh_size(contigs_h);
+  chromList->nKeys = size_of_contigs;
+  chromList->chrom = malloc(size_of_contigs*sizeof(char *));
+  check_mem(chromList->chrom);
+  chromList->len = malloc(size_of_contigs*sizeof(uint32_t));
+  check_mem(chromList->len);
+
+  bam = hts_open(bam_loc, "r");
+  check(bam != 0,"Bam file %s failed to open to read header.",bam_loc);
+  header = sam_hdr_read(bam);
+  char *head_txt = header->text;
+  khint_t k;
+
+  line = strtok(head_txt,"\n");
+  int i = 0;
+	while(line != NULL){
+
+		//Check for a read group line
+		if(strncmp(line,"@SQ",3)==0){
+
+      int is_missing = 0;
+      //Iterate through each tag within the SQ line
+      char *tag = strtok_r(line,"\t",&ptr);
+      while(tag != NULL){
+
+        int chk=0;
+        tmp = malloc(sizeof(char) * 2048);
+        check_mem(tmp);
+        chk = sscanf(tag,"SN:%[^\t\n]",tmp);
+        if(chk>0){
+
+          //Check if the sequence name is one that's required
+          k = kh_get(str, contigs_h, tmp);
+          is_missing = (k == kh_end(contigs_h));
+
+          //If this is an unrequired contig name
+          if(is_missing) break;
+
+          //Check if this sequence name is included in the contig list.
+          chromList->chrom[i] = malloc(sizeof(char) * (strlen(tmp)+1));
+          check_mem(chromList->chrom[i]);
+          chromList->chrom[i] = strcpy(chromList->chrom[i],tmp);
+          check(strcmp(chromList->chrom[i],tmp)==0,"Error copying %s to chromlist",tmp);
+
+        }//End of check for sequence name tag
+        //Check for sequence length tag
+        uint32_t tmpint = 0;
+        chk = sscanf(tag,"LN:%" SCNu32 "",&tmpint);
+        if(chk>0 && is_missing==0){
+          chromList->len[i] = tmpint;
+          i++;
+        }//End of check for sequence length tag
+
+        tag = strtok_r(NULL,"\t",&ptr);
+      }//End of iterating through each tag in the line
+
+    }//End of if this is an SQ line
+    line = strtok(NULL,"\n");
+  }//End of iteration through headers
+
+  free(line);
+  bam_hdr_destroy(header);
+  hts_close(bam);
+  return chromList;
+error:
+  if(line) free(line);
+  if(bam) hts_close(bam);
+  if(header) bam_hdr_destroy(header);
+  if(tmp) free (tmp);
+  return NULL;
+}
+
 int parse_SQ_line(char *line, char *name, int *length){
   char *tag = NULL;
   char *tmp = NULL;

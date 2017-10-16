@@ -99,7 +99,7 @@ error:
   return -1;
 }
 
-int parseRegionString(char *region, uint32_t *start, uint32_t *stop){
+char* parseRegionString(char *region, uint32_t *start, uint32_t *stop){
   const char *q = hts_parse_reg(region, start, stop);
   char *contig = (char*)malloc(q - region + 1);
   strncpy(contig, region, q - region);

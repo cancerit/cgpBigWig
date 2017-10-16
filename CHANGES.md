@@ -1,3 +1,7 @@
+### 0.4.4
+* Correct parseRegionString return type. Fixes [#11](https://github.com/cancerit/cgpBigWig/issues/11).
+* Above change also fixes [#12](https://github.com/cancerit/cgpBigWig/issues/12).
+
 ### 0.4.3
 * Updated libBigWig to 0.3.4 - fixes #10
 

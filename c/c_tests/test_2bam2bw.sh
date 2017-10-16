@@ -64,3 +64,82 @@ then
 fi
 
 rm -f ../test_data/tmp.out ../test_data/expected.tmp.out ../test_data/tmp.bw
+
+#Test for single region passed
+../bin/bam2bw -c ctgA:1-94 -i ../test_data/volvox-sorted.bam -o ../test_data/tmp.bw;
+if [ "$?" != "0" ];
+then
+  echo "ERROR in "$0": Running bam2bw"
+	echo "------"
+	rm -f ../test_data/tmp.bw
+  exit 1
+fi
+
+../bin/bwcat -i ../test_data/tmp.bw > ../test_data/tmp.out
+if [ "$?" != "0" ];
+then
+  echo "ERROR running ../bin/bwcat -i ../test_data/tmp.bw > ../test_data/tmp.out"
+  exit 1;
+fi
+
+diff ../test_data/tmp.out ../test_data/volvox-sorted.coverage.region.expected.bed
+if [ "$?" != "0" ];
+then
+  echo "ERROR in "$0": Total file comparisons don't match"
+	echo "------"
+	rm -f ../test_data/tmp.out ../test_data/expected.tmp.out
+  exit 1
+fi
+
+#Test for region file passed
+../bin/bam2bw -c 22:16165694-16165776 -i ../test_data/test.bam -o ../test_data/tmp.bw;
+if [ "$?" != "0" ];
+then
+  echo "ERROR in "$0": Running bam2bw"
+	echo "------"
+	rm -f ../test_data/tmp.bw
+  exit 1
+fi
+
+../bin/bwcat -i ../test_data/tmp.bw > ../test_data/tmp.out
+if [ "$?" != "0" ];
+then
+  echo "ERROR running ../bin/bwcat -i ../test_data/tmp.bw > ../test_data/tmp.out"
+  exit 1;
+fi
+
+diff ../test_data/tmp.out ../test_data/coverage.region.expected.bed
+if [ "$?" != "0" ];
+then
+  echo "ERROR in "$0": Total file comparisons don't match"
+	echo "------"
+	rm -f ../test_data/tmp.out ../test_data/expected.tmp.out
+  exit 1
+fi
+
+../bin/bam2bw -c 22:16165694-16165776 -i ../test_data/test.bam -o ../test_data/tmp.bw -z;
+if [ "$?" != "0" ];
+then
+  echo "ERROR in "$0": Running bam2bw"
+	echo "------"
+	rm -f ../test_data/tmp.bw
+  exit 1
+fi
+
+../bin/bwcat -i ../test_data/tmp.bw > ../test_data/tmp.out
+if [ "$?" != "0" ];
+then
+  echo "ERROR running ../bin/bwcat -i ../test_data/tmp.bw > ../test_data/tmp.out"
+  exit 1;
+fi
+
+diff ../test_data/tmp.out ../test_data/coverage.region.expected.bed
+if [ "$?" != "0" ];
+then
+  echo "ERROR in "$0": Total file comparisons don't match"
+	echo "------"
+	rm -f ../test_data/tmp.out ../test_data/expected.tmp.out
+  exit 1
+fi
+
+rm -f ../test_data/tmp.out ../test_data/expected.tmp.out
