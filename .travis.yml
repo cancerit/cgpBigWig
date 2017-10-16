@@ -3,18 +3,43 @@ notifications:
   email: false
 
 env:
- - CC=gcc
+  - CC=gcc
+
+language:
+  - c
+
+dist: trusty
 
 addons:
- apt:
-  packages:
-   - build-essential
-   - curl
-   - libcurl4-openssl-dev
-   - nettle-dev
-   - zlib1g-dev
+  apt:
+    packages:
+      - build-essential
+      - curl
+      - libcurl4-openssl-dev
+      - libssl-dev
+      - nettle-dev
+      - zlib1g-dev
 
 install: true
 
 script:
- - ./setup.sh ~/wtsi-opt
+  - ./setup.sh ~/wtsi-opt
+
+matrix:
+  include:
+    - #Trusty
+      compiler: gcc
+      os: linux
+      sudo: required
+    - #Trusty
+      compiler: clang
+      os: linux
+      sudo: required
+    - dist: precise
+      compiler: gcc
+      os: linux
+      sudo: required
+    - dist: precise
+      compiler: clang
+      os: linux
+      sudo: required

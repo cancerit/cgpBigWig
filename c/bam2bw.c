@@ -187,7 +187,11 @@ static int pileup_func(uint32_t tid, uint32_t position, int n, const bam_pileup1
       uint32_t start =  tmp->lstart;
       uint32_t stop = pos;
       float cvg = (float)tmp->lcoverage;
-      int chck = bwAddIntervals(tmp->bwout,&tmp->head->target_name[tmp->ltid],&start,&stop,&cvg,single);
+			if(tmp->lcoverage == 0 && tmp->ltid != tid-1 && tmp->ltid != tid){
+				tmp->ltid = tid;
+			}
+      int chck = bwAddIntervals(tmp->bwout,
+									&tmp->head->target_name[tmp->ltid],&start,&stop,&cvg,single);
       check(chck==0,"Error adding bw interval %s:%"PRIu32"-%"PRIu32" = %f . Error code: %d",tmp->head->target_name[tmp->ltid],start,stop,cvg,chck);
     }
     //if(tmp->inczero == 1 && tmp->ltid != tid && pos != tmp->head->target_len[tmp->ltid]){
@@ -231,11 +235,17 @@ int main(int argc, char *argv[]){
 	setup_options(argc, argv);
 	tmpstruct_t tmp;
 	int no_of_regions = 0;
+
+	//setup hash to count unique contigs
+	khash_t(str) *contigs_h = NULL;
+	khint_t k;
+	contigs_h = kh_init(str);
+
 	int sq_lines = get_no_of_SQ_lines(input_file);
 	FILE *fp_bed = NULL;
 	if(region_store){
     if(is_regions_file==1){
-      //If we have a bedfile
+      //If we have a bedfile or regions
       no_of_regions = line_count(region_store);
       check(no_of_regions>0,"Error counting entries in region file %s\n",region_store);
       our_region_list = calloc(no_of_regions, sizeof(char *));
@@ -244,11 +254,17 @@ int main(int argc, char *argv[]){
       fp_bed = fopen(region_store,"r");
         char line[512];
         while(fgets(line,512,fp_bed)){
-          char *contig = malloc(sizeof(char)*256);
+          char *contig = malloc(sizeof(char)*1024);
           check_mem(contig);
           int beg,end;
           int chk = sscanf(line,"%s\t%d\t%d",contig,&beg,&end);
           check(chk==3,"Error reading line '%s' from regions bed file.",line);
+
+					//Attempt to add contig as key to hash
+					int absent;
+        	k = kh_put(str, contigs_h, contig, &absent);
+        	if (absent) kh_key(contigs_h, k) = strdup(contig);
+
           char *region = malloc(sizeof(char) * (strlen(contig)+get_int_length(beg)+get_int_length(end))+3);
           check_mem(region);
           chk = sprintf(region,"%s:%d-%d",contig,beg+1,end); //+1 to beginning as this is bed
@@ -257,11 +273,24 @@ int main(int argc, char *argv[]){
           i++;
         }
       fclose(fp_bed);
-    }else{
+    }else{ // End of if this has a regions file as input
       //If we have a single region....
       no_of_regions = 1;
       our_region_list = calloc(no_of_regions, sizeof(char *));
       check_mem(region_list);
+			char *contig = malloc(sizeof(char)*1024);
+			check_mem(contig);
+			int beg,end;
+			int chk = sscanf(region_store,"%[^:]:%d-%d",contig,&beg,&end);
+			check(chk==3,"Error reading line '%s' from regions bed file.",region_store);
+
+			//Attempt to add contig as key to hash
+			int absent;
+			k = kh_put(str, contigs_h, contig, &absent);
+			if (absent) kh_key(contigs_h, k) = strdup(contig);
+
+			free(contig);
+
       our_region_list[0] = region_store;
     }
 	}else{
@@ -288,6 +317,10 @@ int main(int argc, char *argv[]){
         check_mem(region);
         chk = sprintf(region,"%s:%d-%d",contig,1,end);
         check(chk==((strlen(contig)+get_int_length(end))+3),"Error creating region line from bed entry '%s'.",line);
+				//Attempt to add contig as key to hash
+				int absent;
+				k = kh_put(str, contigs_h, contig, &absent);
+				if (absent) kh_key(contigs_h, k) = strdup(contig);
         our_region_list[i] = region;
         i++;
       }//End of if this is an SQ line
@@ -304,19 +337,19 @@ int main(int argc, char *argv[]){
   //Open file as a bw file
   chromList_t *chromList = NULL;
   //Generate the list of chromosomes using the bam header.
-  chromList = calloc(1, sizeof(chromList_t));
-  check_mem(chromList);
-  chromList->nKeys = sq_lines;
-  chromList->chrom = calloc(sq_lines,sizeof(char *));
-  check_mem(chromList->chrom);
-  chromList->len = calloc(sq_lines,sizeof(uint32_t));
-  check_mem(chromList->len);
-  //Iterate through the header of the bam file and get all contigs.
-  int res = build_chromList_from_bam(chromList,input_file);
-  check(res==1,"Error building chromList from bam header.");
+  chromList = build_chromList_from_bam_limit(input_file,contigs_h);
+	check(chromList != NULL,"Error generating chromList from bam with limits");
+	//fprintf(stderr,"Post build list entries: %d\t%s:%d\n",chromList->nKeys,chromList->chrom[0],chromList->len[0]);
+
+	for (k = 0; k < kh_end(contigs_h); ++k)
+		if (kh_exist(contigs_h, k))
+			free((char*)kh_key(contigs_h, k));
+	kh_destroy(str, contigs_h);
+
+  check(chromList!=NULL,"Error building chromList from bam header.");
 
   //Initialise bw
-  res = bwInit(1<<17);
+  int res = bwInit(1<<17);
   check(res==0,"Received an error in bwInit");
 
   tmp.bwout = initialise_bw_output(out_file,chromList);
@@ -365,7 +398,7 @@ int main(int argc, char *argv[]){
   bwCleanup();
 
   int clean=0;
-  for(clean=0; clean<sq_lines; clean++){
+  for(clean=0; clean<chromList->nKeys; clean++){
     if(chromList->chrom){
       free(chromList->chrom[clean]);
     }
@@ -379,5 +412,23 @@ int main(int argc, char *argv[]){
 error:
   if(our_region_list) free(our_region_list);
   if(fp_bed) fclose(fp_bed);
+	if(contigs_h) {
+		for (k = 0; k < kh_end(contigs_h); ++k){
+			if (kh_exist(contigs_h, k)){
+					free((char*)kh_key(contigs_h, k));
+				}
+			}
+			kh_destroy(str, contigs_h);
+	}
+	if(chromList){
+		for(clean=0; clean<sq_lines; clean++){
+	    if(chromList->chrom){
+	      free(chromList->chrom[clean]);
+	    }
+	  }
+	  free(chromList->chrom);
+	  free(chromList->len);
+	  free(chromList);
+	}
   return -1;
 }
