@@ -187,7 +187,11 @@ static int pileup_func(uint32_t tid, uint32_t position, int n, const bam_pileup1
       uint32_t start =  tmp->lstart;
       uint32_t stop = pos;
       float cvg = (float)tmp->lcoverage;
-      int chck = bwAddIntervals(tmp->bwout,&tmp->head->target_name[tmp->ltid],&start,&stop,&cvg,single);
+			if(tmp->lcoverage == 0 && tmp->ltid != tid-1 && tmp->ltid != tid){
+				tmp->ltid = tid;
+			}
+      int chck = bwAddIntervals(tmp->bwout,
+									&tmp->head->target_name[tmp->ltid],&start,&stop,&cvg,single);
       check(chck==0,"Error adding bw interval %s:%"PRIu32"-%"PRIu32" = %f . Error code: %d",tmp->head->target_name[tmp->ltid],start,stop,cvg,chck);
     }
     //if(tmp->inczero == 1 && tmp->ltid != tid && pos != tmp->head->target_len[tmp->ltid]){
