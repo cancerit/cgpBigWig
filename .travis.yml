@@ -19,6 +19,8 @@ addons:
       - libssl-dev
       - nettle-dev
       - zlib1g-dev
+      - libbz2-dev
+      - liblzma-dev
 
 install: true
 
