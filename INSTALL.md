@@ -1,18 +1,24 @@
-#Install:
+# Install
+
 `./setup.sh /install/to/here`
 
 `'/install/to/here'` is where you want the bin/lib folders to be created.
 
-setup.sh will install
+setup.sh will install:
+
 - cgpBigWig tools bwjoin, bwcat, bam2bw, bam2bwbases and bam2bedgraph
 
-#OS:
-  This distribution will only work on *NIX type systems at present.
+## OS
+  This distribution will only work on \*NIX type systems at present.
 
-#Other Software
-  For installation to proceed you require the following packages:
+## Other Software
 
-##For Ubuntu (tested with 14.04)
+For installation to proceed you require the following packages:
+
+### Ubuntu
+
+(tested with 14.04)
+
 ```
 apt-get update && \
 apt-get -y install \
@@ -20,7 +26,10 @@ build-essential zlib1g-dev libncurses5-dev libcurl4-gnutls-dev libssl-dev nettle
 apt-get clean
 ```
 
-##For Amazon Linux AMI (2016.03.3 x86_64)
+### Amazon Linux AMI
+
+(2016.03.3 x86_64)
+
 ```
 yum -q -y update && \
 yum -y install \
@@ -45,8 +54,10 @@ cd .. && \
 rm -rf nettle nettle.tar.gz
 ```
 
-##OSX
-  In order for cgpBigWig to install you may need the following packages installed
+### OSX
+
+In order for cgpBigWig to install you may need the following packages installed
+
 ```
 brew install gnutls
 # fixes gnutls include
