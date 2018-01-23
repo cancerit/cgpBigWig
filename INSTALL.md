@@ -16,7 +16,7 @@ setup.sh will install
 ```
 apt-get update && \
 apt-get -y install \
-build-essential zlib1g-dev libncurses5-dev libcurl4-gnutls-dev libssl-dev nettle-dev &&\
+build-essential zlib1g-dev libncurses5-dev libcurl4-gnutls-dev libssl-dev nettle-dev libbz2-dev liblzma-dev &&\
 apt-get clean
 ```
 
@@ -24,7 +24,7 @@ apt-get clean
 ```
 yum -q -y update && \
 yum -y install \
-make glibc-devel gcc patch ncurses-devel openssl-devel libcurl-devel gnutls-devel libtasn1-devel p11-kit-devel gmp-devel nettle-devel
+make glibc-devel gcc patch ncurses-devel openssl-devel libcurl-devel gnutls-devel libtasn1-devel p11-kit-devel gmp-devel nettle-devel libbz2-devel liblzma-devel
 ```
 
 **Should nettle-devel not exist**
