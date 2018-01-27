@@ -142,4 +142,4 @@ then
   exit 1
 fi
 
-rm -f ../test_data/tmp.out ../test_data/expected.tmp.out
+rm -f ../test_data/tmp.out ../test_data/expected.tmp.out ../test_data/tmp.bw
