@@ -33,7 +33,7 @@
 ###########################
 
 # for bamstats
-SOURCE_HTSLIB="https://github.com/samtools/htslib/releases/download/1.5/htslib-1.5.tar.bz2"
+SOURCE_HTSLIB="https://github.com/samtools/htslib/releases/download/1.7/htslib-1.7.tar.bz2"
 #libBigWig - bigwig access library
 SOURCE_LIB_BW="https://github.com/dpryan79/libBigWig/archive/0.4.2.tar.gz"
 
@@ -119,6 +119,7 @@ if [ -e $SETUP_DIR/htslib.success ]; then
   echo " previously installed ...";
 else
   echo
+  cd $SETUP_DIR
   mkdir -p htslib
   tar --strip-components 1 -C htslib -jxf htslib.tar.bz2
   cd htslib
