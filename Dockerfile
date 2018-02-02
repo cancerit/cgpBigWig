@@ -4,7 +4,7 @@ USER root
 
 ENV OPT /opt/wtsi-cgp
 ENV PATH $OPT/bin:$PATH
-ENV LD_LIBRARY_PATH $OPT/lib
+ENV LD_LIBRARY_PATH $OPT/lib:$LD_LIBRARY_PATH
 ENV LC_ALL C
 
 RUN apt-get -yq update
@@ -32,9 +32,8 @@ RUN bash build/opt-build.sh $OPT
 
 FROM  ubuntu:16.04
 
-MAINTAINER  drj@sanger.ac.uk
-
-LABEL uk.ac.sanger.cgp="Cancer Genome Project, Wellcome Trust Sanger Institute" \
+LABEL maintainer="drj@sanger.ac.uk"\
+      uk.ac.sanger.cgp="Cancer Genome Project, Wellcome Trust Sanger Institute" \
       version="1.0.0" \
       description="cgpBigWig for dockstore.org"
 
