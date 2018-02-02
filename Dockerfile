@@ -1,26 +1,25 @@
 FROM  ubuntu:16.04 as builder
 
-USER root
+USER  root
 
 ENV OPT /opt/wtsi-cgp
 ENV PATH $OPT/bin:$PATH
-ENV LD_LIBRARY_PATH $OPT/lib:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH $OPT/lib
 ENV LC_ALL C
 
 RUN apt-get -yq update
 RUN apt-get install -yq --no-install-recommends\
- apt-transport-https\
- curl\
- ca-certificates\
- make\
- bzip2\
- gcc\
- zlib1g-dev\
- libbz2-dev\
- liblzma-dev\
- nettle-dev\
- libcurl4-gnutls-dev\
- libncurses5-dev
+  apt-transport-https\
+  curl\
+  ca-certificates\
+  make\
+  bzip2\
+  gcc\
+  zlib1g-dev\
+  libbz2-dev\
+  liblzma-dev\
+  libcurl4-gnutls-dev\
+  libncurses5-dev
 
 RUN mkdir -p $OPT/bin
 
