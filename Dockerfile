@@ -10,12 +10,13 @@ RUN apt-get -yq update
 RUN apt-get install -yq --no-install-recommends\
  curl\
  ca-certificates\
- build-essential\
+ make\
+ gcc\
  zlib1g-dev\
  libbz2-dev\
- libcurl4-openssl-dev\
  liblzma-dev\
  nettle-dev\
+ libcurl4-gnutls-dev\
  libncurses5-dev
 
 RUN mkdir -p $OPT/bin
