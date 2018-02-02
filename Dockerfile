@@ -11,6 +11,7 @@ RUN apt-get install -yq --no-install-recommends\
  curl\
  ca-certificates\
  make\
+ bzip2\
  gcc\
  zlib1g-dev\
  libbz2-dev\
