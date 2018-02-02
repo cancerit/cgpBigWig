@@ -12,6 +12,7 @@ RUN apt-get install -yq --no-install-recommends\
  ca-certificates\
  build-essential\
  zlib1g-dev\
+ libbz2-dev\
  libcurl4-openssl-dev\
  liblzma-dev\
  nettle-dev\
