@@ -9,6 +9,7 @@ ENV LD_LIBRARY_PATH $OPT/lib
 RUN apt-get -yq update
 RUN apt-get install -yq --no-install-recommends\
  curl\
+ ca-certificates\
  build-essential\
  zlib1g-dev\
  libcurl4-openssl-dev\
@@ -41,6 +42,7 @@ ENV LC_ALL C
 RUN apt-get -yq update
 RUN apt-get install -yq --no-install-recommends\
   curl\
+  ca-certificates\
   bzip2\
   zlib1g\
   liblzma5\
