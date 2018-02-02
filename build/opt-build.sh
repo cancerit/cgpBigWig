@@ -59,18 +59,20 @@ set -u
 
 ## HTSLIB (tar.bz2)
 if [ ! -e $SETUP_DIR/htslib.success ]; then
+  rm -rf htslib
+  mkdir -p htslib
   curl -sSL --retry 10 https://github.com/samtools/htslib/releases/download/${VER_HTSLIB}/htslib-${VER_HTSLIB}.tar.bz2 > distro.tar.bz2
-  rm -rf distro/*
-  tar --strip-components 1 -C distro -jxf distro.tar.bz2
-  cd distro
+  tar --strip-components 1 -C htslib -jxf distro.tar.bz2
+  cd htslib
   ./configure --enable-plugins --enable-libcurl --prefix=$INST_PATH
   make clean
   make -j$CPU
   make install
   cd $SETUP_DIR
-  rm -rf distro.* distro/*
+  rm -rf distro.*
   touch $SETUP_DIR/htslib.success
 fi
+
 
 ## LIB-BW (tar.gz)
 if [ ! -e $SETUP_DIR/libBigWig.success ]; then

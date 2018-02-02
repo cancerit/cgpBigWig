@@ -5,6 +5,7 @@ USER root
 ENV OPT /opt/wtsi-cgp
 ENV PATH $OPT/bin:$PATH
 ENV LD_LIBRARY_PATH $OPT/lib
+ENV LC_ALL C
 
 RUN apt-get -yq update
 RUN apt-get install -yq --no-install-recommends\
