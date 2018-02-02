@@ -11,6 +11,7 @@ set -u
 VER_HTSLIB="1.7"
 VER_LIBBW="0.4.2"
 VER_CGPBIGWIG="0.5.0-rc1"
+VER_SAMTOOLS="1.7"
 
 
 if [ "$#" -lt "1" ] ; then
