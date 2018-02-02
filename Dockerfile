@@ -9,6 +9,7 @@ ENV LC_ALL C
 
 RUN apt-get -yq update
 RUN apt-get install -yq --no-install-recommends\
+ apt-transport-https\
  curl\
  ca-certificates\
  make\
@@ -44,6 +45,7 @@ ENV LC_ALL C
 
 RUN apt-get -yq update
 RUN apt-get install -yq --no-install-recommends\
+  apt-transport-https\
   curl\
   ca-certificates\
   bzip2\
