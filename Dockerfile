@@ -16,13 +16,17 @@ RUN apt-get install -yq --no-install-recommends\
   make\
   bzip2\
   gcc\
+  libtasn1-dev\
+  libgnutls-dev\
+  libnettle-dev\
+  libhogweed-dev\
+  libgmp-dev\
+  libp11-kit-dev\
   zlib1g-dev\
   libbz2-dev\
   liblzma-dev\
   libcurl4-gnutls-dev\
   libncurses5-dev
-
-RUN ldconfig
 
 RUN mkdir -p $OPT/bin
 
