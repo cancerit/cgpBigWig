@@ -22,6 +22,8 @@ RUN apt-get install -yq --no-install-recommends\
   libcurl4-gnutls-dev\
   libncurses5-dev
 
+RUN ldconfig
+
 RUN mkdir -p $OPT/bin
 
 ADD build/opt-build.sh build/
