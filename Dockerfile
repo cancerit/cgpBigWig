@@ -18,7 +18,7 @@ RUN apt-get install -yq --no-install-recommends\
   gcc\
   libtasn1-dev\
   libgnutls-dev\
-  libnettle-dev\
+  nettle-dev\
   libhogweed-dev\
   libgmp-dev\
   libp11-kit-dev\
