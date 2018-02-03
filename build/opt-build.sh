@@ -11,7 +11,7 @@ set -u
 VER_HTSLIB="1.7"
 VER_LIBBW="0.4.2"
 VER_CGPBIGWIG="0.5.0-rc1"
-VER_SAMTOOLS="1.7"
+VER_BBB2="2.0.83-release-20180105121132"
 
 
 if [ "$#" -lt "1" ] ; then
@@ -56,6 +56,21 @@ export PATH=`echo $INST_PATH/bin:$PATH | perl -pe 's/:\$//;'`
 export MANPATH=`echo $INST_PATH/man:$INST_PATH/share/man:$MANPATH | perl -pe 's/:\$//;'`
 set -u
 
+## biobambam2 first
+if [ ! -e $SETUP_DIR/bbb2.sucess ]; then
+  curl -sSL --retry 10 https://github.com/gt1/biobambam2/releases/download/${VER_BBB2}/biobambam2-${VER_BBB2}-x86_64-etch-linux-gnu.tar.gz > distro.tar.gz
+  tar --strip-components 3 -C distro -zxf distro.tar.gz
+  mkdir -p $INST_PATH/bin $INST_PATH/etc $INST_PATH/lib $INST_PATH/share
+  rm -f distro/bin/curl # don't let this file in SSL doesn't work
+  cp -r distro/bin/* $INST_PATH/bin/.
+  cp -r distro/etc/* $INST_PATH/etc/.
+  cp -r distro/lib/* $INST_PATH/lib/.
+  cp -r distro/share/* $INST_PATH/share/.
+  rm -rf distro.* distro/*
+  touch $SETUP_DIR/bbb2.success
+fi
+
+
 ##### DEPS for cgpBigWig #####
 
 ## HTSLIB (tar.bz2)
@@ -72,21 +87,6 @@ if [ ! -e $SETUP_DIR/htslib.success ]; then
   cd $SETUP_DIR
   rm -rf distro.*
   touch $SETUP_DIR/htslib.success
-fi
-
-## SAMTOOLS (tar.bz2)
-if [ ! -e $SETUP_DIR/samtools.success ]; then
-  curl -sSL --retry 10 https://github.com/samtools/samtools/releases/download/${VER_SAMTOOLS}/samtools-${VER_SAMTOOLS}.tar.bz2 > distro.tar.bz2
-  rm -rf distro/*
-  tar --strip-components 1 -C distro -xjf distro.tar.bz2
-  cd distro
-  ./configure --enable-plugins --enable-libcurl --with-htslib=$INST_PATH --prefix=$INST_PATH
-  make clean
-  make -j$CPU all
-  make install
-  cd $SETUP_DIR
-  rm -rf distro.* distro/*
-  touch $SETUP_DIR/samtools.success
 fi
 
 ## LIB-BW (tar.gz)
