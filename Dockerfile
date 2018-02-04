@@ -22,29 +22,19 @@ RUN \
     # Install system dependencies
     apt-get -yqq update --fix-missing && \
     apt-get -yqq install \
-    \
-    # For Locales, see below.
-    # cgpBigWig dependencies
-    wget \
-    locales \
-    build-essential \
-    zlib1g-dev \
-    libncurses5-dev \
-    libcurl4-gnutls-dev \
-    libssl-dev \
-    nettle-dev \
-    libgnutls-dev \
-    libtasn1-6-dev \
-    libbz2-dev \
-    liblzma-dev \
-    libp11-kit-dev && \
+        build-essential \
+        libbz2-dev \
+        libcurl4-gnutls-dev \
+        libgnutls-dev \
+        liblzma-dev \
+        libncurses5-dev \
+        libssl-dev \
+        locales \
+        nettle-dev \
+        wget \
+        zlib1g-dev \
+    && \
     apt-get clean && \
-    \
-    # build cgpBigWig.
-    cd /code && \
-    ./setup.sh $OPT && \
-    cd ~ && \
-    rm -rf /code \
     \
     # Configure default locale, see below.
     echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen && \
@@ -59,6 +49,13 @@ RUN \
 # https://crosbymichael.com/dockerfile-best-practices-take-2.html
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
+
+# Install package.
+RUN \
+    cd /code && \
+    ./setup.sh $OPT && \
+    cd ~ && \
+    rm -rf /code
 
 # Set volume to data as per:
 # https://github.com/BD2KGenomics/cgl-docker-lib
