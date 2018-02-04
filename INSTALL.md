@@ -15,6 +15,7 @@ For installation to proceed you require the following packages:
         apt-get update && \
         apt-get -y install \
             build-essential \
+            wget \
             zlib1g-dev \
             libncurses5-dev \
             libcurl4-gnutls-dev \
@@ -29,6 +30,7 @@ For installation to proceed you require the following packages:
         apt-get update && \
         apt-get -y install \
             build-essential \
+            wget \
             zlib1g-dev \
             libncurses5-dev \
             libcurl4-gnutls-dev \
