@@ -18,6 +18,7 @@ Package of C scripts for generation of [BigWig][BigWig] coverage files.
     - [bg2bw](#bg2bw)
     - [bam2bwbases](#bam2bwbases)
     - [bam2bedgraph](#bam2bedgraph)
+- [Contributing](#contributing)
 
 # Installation
 
@@ -160,6 +161,10 @@ Other:
 -h --help      Display this usage information.
 -v --version   Prints the version number.
 ```
+
+# Contributing
+
+Contributions are welcome, and they are greatly appreciated! Check our [contributing guidelines](CONTROBUTING.md)!
 
 <!-- References -->
 [BigWig]: https://genome.ucsc.edu/goldenpath/help/bigWig.html
