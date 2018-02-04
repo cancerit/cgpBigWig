@@ -2,7 +2,6 @@ FROM ubuntu:16.04
 
 # Set maintainer labels.
 LABEL maintainer Keiran M. Raine <kr2@sanger.ac.uk>
-LABEL maintainer Juan S. Medina <medinaj@mskcc.org>
 
 # Install all dependencies in OPT.
 ENV OPT /opt/bundle
@@ -61,7 +60,3 @@ RUN \
 # https://github.com/BD2KGenomics/cgl-docker-lib
 VOLUME /data
 WORKDIR /data
-
-# Entry point set to wrapper.sh as per:
-# https://github.com/BD2KGenomics/cgl-docker-lib
-ENTRYPOINT ["bash"]
