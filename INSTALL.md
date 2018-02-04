@@ -10,35 +10,21 @@
 
 For installation to proceed you require the following packages:
 
+<!-- No need to duplicate this information -->
+* Ubuntu 16.04: see [`Dockerfile`](Dockerfile).
+
 * Ubuntu 14.04:
 
         apt-get update && \
         apt-get -y install \
             build-essential \
-            wget \
-            zlib1g-dev \
-            libncurses5-dev \
             libcurl4-gnutls-dev \
+            libgnutls-dev \
+            libncurses5-dev \
             libssl-dev \
             nettle-dev \
-            libgnutls-dev \
-            &&\
-        apt-get clean
-
-* Ubuntu 16.04:
-
-        apt-get update && \
-        apt-get -y install \
-            build-essential \
             wget \
             zlib1g-dev \
-            libncurses5-dev \
-            libcurl4-gnutls-dev \
-            libssl-dev \
-            nettle-dev \
-            libgnutls-dev \
-            libtasn1-6-dev \
-            libp11-kit-dev \
             &&\
         apt-get clean
 
