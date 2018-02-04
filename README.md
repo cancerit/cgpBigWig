@@ -1,44 +1,54 @@
-cgpBigWig
-==============
+# cgpBigWig
 
-Package of C scripts for generation of [BigWig](https://genome.ucsc.edu/goldenpath/help/bigWig.html) coverage files
+Package of C scripts for generation of [BigWig][BigWig] coverage files.
 
-| Master | Dev |
-|---|---|
-| [![Build Status](https://travis-ci.org/cancerit/cgpBigWig.svg?branch=master)](https://travis-ci.org/ICGC-TCGA-PanCancer/PCAP-core) |  [![Build Status](https://travis-ci.org/cancerit/cgpBigWig.svg?branch=develop)](https://travis-ci.org/ICGC-TCGA-PanCancer/PCAP-core) |
+| Master                                        | Develop                                         |
+| --------------------------------------------- | ----------------------------------------------- |
+| [![Master Badge][travis-master]][travis-base] | [![Develop Badge][travis-develop]][travis-base] |
 
----
+# Contents
 
-###Dependencies/Install
+- [cgpBigWig](#cgpbigwig)
+- [Contents](#contents)
+- [Installation](#installation)
+- [Programs](#programs)
+    - [bwcat](#bwcat)
+    - [bwjoin](#bwjoin)
+    - [bam2bw](#bam2bw)
+    - [bg2bw](#bg2bw)
+    - [bam2bwbases](#bam2bwbases)
+    - [bam2bedgraph](#bam2bedgraph)
 
-Some of the code included in this package has dependencies on external packages:
+# Installation
 
- * [libBigWig](https://github.com/dpryan79/libBigWig)
- * [htslib](https://github.com/samtools/htslib)
+To install this package run:
 
-Please see the respective licence for each before use.
+    setup.sh /path/to/installation
 
-Please use `setup.sh` to install the dependencies.  Please be aware that this expects basic C
-compilation libraries and tools to be available, most are listed in [`INSTALL`](INSTALL.md).
+⚠️ Be aware that this expects basic C compilation libraries and tools to be available, check the [`INSTALL`](INSTALL.md) for system specific dependencies (e.g. Ubuntu, OSX, etc.).
 
----
+`setup.sh` will install the following external dependencies:
 
-### Programs
+* [libBigWig][libBigWig]
+* [htslib][htslib]
 
-[bwcat](#bwcat) - Read the contents of a bigwig (.bw) file
+Its important that you review the respective licence for each before use.
 
-[bwjoin](#bwjoin) - Concatenate bigwig files together
+# Programs
 
-[bam2bw](#bam2bw) - Generate bigwig (.bw) coverage file from bam
+| Program                       | Description                                                               |
+| ----------------------------- | ------------------------------------------------------------------------- |
+| [bwcat](#bwcat)               | Read the contents of a bigwig (.bw) file                                  |
+| [bwjoin](#bwjoin)             | Concatenate bigwig files together                                         |
+| [bam2bw](#bam2bw)             | Generate bigwig (.bw) coverage file from bam                              |
+| [bg2bw](#bg2bw)               | Generate bigwig (.bw) coverage file from bedgraph (.bed) format           |
+| [bam2bwbases](#bam2bwbases)   | Generate bigwig (.bw) proportion file of each base at a position from bam |
+| [bam2bedgraph](#bam2bedgraph) | Generate a coverage bedgraph from bam                                     |
 
-[bg2bw](#bg2bw) - Generate bigwig (.bw) coverage file from bedgraph (.bed) format
+## bwcat
 
-[bam2bwbases](#bam2bwbases) - Generate bigwig (.bw) proportion file of each base at a position from bam
+Read the contents of a bw file.
 
-[bam2bedgraph](#bam2bedgraph) - Generate a coverage bedgraph from bam
-
-##### bwcat
-Read the contents of a bw file
 ```
 Usage: bwcat -i input-path
 
@@ -54,8 +64,10 @@ Other:
 -v --version               Prints the version number.
 ```
 
-##### bwjoin
-Concatenate bw files together
+## bwjoin
+
+Concatenate bw files together.
+
 ```
 Usage: bwjoin -f genome.fai -o output.bw
 
@@ -69,8 +81,10 @@ Other:
 -v --version   Prints the version number.
 ```
 
-##### bam2bw
-Generate bw coverage file from bam
+## bam2bw
+
+Generate bw coverage file from bam.
+
 ```
 Usage: bam2bw -i input.[b|cr]am -o output.bw
 bam2bw can be used to generate a bw file of coverage from a [cr|b]am file.
@@ -89,8 +103,10 @@ Other:
 -v  --version                                     Prints the version number.
 ```
 
-##### bg2bw
-Generate bw coverage file from bedgraph (.bed) format
+## bg2bw
+
+Generate bw coverage file from bedgraph (.bed) format.
+
 ```
 Usage: bg2bw -i input.bed -c chrom.list -o output.bw
 bg2bw can be used to generate a bw file from a bedgraph file.
@@ -104,8 +120,10 @@ Other:
 -v  --version                Prints the version number.
 ```
 
-##### bam2bwbases
-Generate bw proportion file of each base at a position from bam
+## bam2bwbases
+
+Generate bw proportion file of each base at a position from bam.
+
 ```
 Usage: bam2bwbases -i input.[b|cr]am -o output.bw
 bam2bwbases can be used to generate four bw files of per base proportions.
@@ -123,8 +141,10 @@ Other:
 -v  --version                                     Prints the version number.
 ```
 
-##### bam2bedgraph
-Generate a coverage bedgraph from bam
+## bam2bedgraph
+
+Generate a coverage bedgraph from bam.
+
 ```
 Usage: bam2bedgraph -i input.[cr|b]am -o file [-r region] [-h] [-v]
 
@@ -135,8 +155,18 @@ Create a BEDGraph file of genomic coverage. BAM file must be sorted.
 Optional:
 -r --region    Region in bam to access.
 -f --filter    Ignore reads with the filter flags [int].
+
 Other:
 -h --help      Display this usage information.
 -v --version   Prints the version number.
 ```
 
+<!-- References -->
+[BigWig]: https://genome.ucsc.edu/goldenpath/help/bigWig.html
+[libBigWig]: https://github.com/dpryan79/libBigWig
+[htslib]: https://github.com/samtools/htslib
+
+<!-- Travis -->
+[travis-base]: https://travis-ci.org/ICGC-TCGA-PanCancer/PCAP-core
+[travis-master]: https://travis-ci.org/cancerit/cgpBigWig.svg?branch=master
+[travis-develop]: https://travis-ci.org/cancerit/cgpBigWig.svg?branch=develop
