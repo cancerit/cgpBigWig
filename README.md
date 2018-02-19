@@ -1,43 +1,58 @@
-cgpBigWig
-==============
+# cgpBigWig
 
-Package of C scripts for generation of [BigWig](https://genome.ucsc.edu/goldenpath/help/bigWig.html) coverage files
+Package of C scripts for generation of [BigWig][BigWig] coverage files
 
-| Master | Dev |
-|---|---|
-| [![Build Status](https://travis-ci.org/cancerit/cgpBigWig.svg?branch=master)](https://travis-ci.org/ICGC-TCGA-PanCancer/PCAP-core) |  [![Build Status](https://travis-ci.org/cancerit/cgpBigWig.svg?branch=develop)](https://travis-ci.org/ICGC-TCGA-PanCancer/PCAP-core) |
+| Master                                        | Dev                                          |
+|-----------------------------------------------|----------------------------------------------|
+| [![Master Badge][travis-master]][travis-base] |  [![Dev Badge][travis-develop]][travis-base] |
 
----
+## Contents
 
-###Dependencies/Install
+- [cgpBigWig](#cgpbigwig)
+  - [Contents](#contents)
+  - [Installation](#installation)
+  - [Docker](#docker)
+  - [Programs](#programs)
+   - [bwcat](#bwcat)
+   - [bwjoin](#bwjoin)
+   - [bam2bw](#bam2bw)
+   - [bg2bw](#bg2bw)
+   - [bam2bwbases](#bam2bwbases)
+   - [bam2bedgraph](#bam2bedgraph)
+  - [Contributing](#contributing)
+  - [License](#license)
 
-Some of the code included in this package has dependencies on external packages:
+## Installation
 
- * [libBigWig](https://github.com/dpryan79/libBigWig)
- * [htslib](https://github.com/samtools/htslib)
+To install this package run:
 
-Please see the respective licence for each before use.
+`setup.sh /path/to/installation`
 
-Please use `setup.sh` to install the dependencies.  Please be aware that this expects basic C
-compilation libraries and tools to be available, most are listed in [`INSTALL`](INSTALL.md).
+:warning: Be aware that this expects basic C compilation libraries and tools to be available, check the [`INSTALL`](INSTALL.md) for system specific dependencies (e.g. Ubuntu, OSX, etc.).
 
----
+`setup.sh` will install the following external dependencies:
 
-### Programs
+* [libBigWig][libBigWig]
+* [htslib][htslib]
 
-[bwcat](#bwcat) - Read the contents of a bigwig (.bw) file
+:warning: Please review the respective licence for each before use.
 
-[bwjoin](#bwjoin) - Concatenate bigwig files together
+## Docker
 
-[bam2bw](#bam2bw) - Generate bigwig (.bw) coverage file from bam
+There is a pre-built image containing this codebase on [quay.io], [dockstore-cgpbigwig] and via [dockstore]
 
-[bg2bw](#bg2bw) - Generate bigwig (.bw) coverage file from bedgraph (.bed) format
+## Programs
 
-[bam2bwbases](#bam2bwbases) - Generate bigwig (.bw) proportion file of each base at a position from bam
+| Program                       | Description                                                               |
+| ----------------------------- | ------------------------------------------------------------------------- |
+| [bwcat](#bwcat)               | Read the contents of a bigwig (.bw) file                                  |
+| [bwjoin](#bwjoin)             | Concatenate bigwig files together                                         |
+| [bam2bw](#bam2bw)             | Generate bigwig (.bw) coverage file from bam                              |
+| [bg2bw](#bg2bw)               | Generate bigwig (.bw) coverage file from bedgraph (.bed) format           |
+| [bam2bwbases](#bam2bwbases)   | Generate bigwig (.bw) proportion file of each base at a position from bam |
+| [bam2bedgraph](#bam2bedgraph) | Generate a coverage bedgraph from bam                                     |
 
-[bam2bedgraph](#bam2bedgraph) - Generate a coverage bedgraph from bam
-
-##### bwcat
+### bwcat
 Read the contents of a bw file
 ```
 Usage: bwcat -i input-path
@@ -54,7 +69,7 @@ Other:
 -v --version               Prints the version number.
 ```
 
-##### bwjoin
+### bwjoin
 Concatenate bw files together
 ```
 Usage: bwjoin -f genome.fai -o output.bw
@@ -89,7 +104,7 @@ Other:
 -v  --version                                     Prints the version number.
 ```
 
-##### bg2bw
+### bg2bw
 Generate bw coverage file from bedgraph (.bed) format
 ```
 Usage: bg2bw -i input.bed -c chrom.list -o output.bw
@@ -104,7 +119,7 @@ Other:
 -v  --version                Prints the version number.
 ```
 
-##### bam2bwbases
+### bam2bwbases
 Generate bw proportion file of each base at a position from bam
 ```
 Usage: bam2bwbases -i input.[b|cr]am -o output.bw
@@ -123,7 +138,7 @@ Other:
 -v  --version                                     Prints the version number.
 ```
 
-##### bam2bedgraph
+### bam2bedgraph
 Generate a coverage bedgraph from bam
 ```
 Usage: bam2bedgraph -i input.[cr|b]am -o file [-r region] [-h] [-v]
@@ -140,3 +155,47 @@ Other:
 -v --version   Prints the version number.
 ```
 
+## License
+```
+Copyright (c) 2017-2018 Genome Research Ltd.
+
+Author: David Jones <cgpit@sanger.ac.uk>
+
+This file is part of cgpBigWig.
+
+cgpBigWig is free software: you can redistribute it and/or modify it under
+the terms of the GNU Affero General Public License as published by the Free
+Software Foundation; either version 3 of the License, or (at your option) any
+later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+1. The usage of a range of years within a copyright statement contained within
+this distribution should be interpreted as being equivalent to a list of years
+including the first and last year specified and all consecutive years between
+them. For example, a copyright statement that reads ‘Copyright (c) 2005, 2007-
+2009, 2011-2012’ should be interpreted as being identical to a statement that
+reads ‘Copyright (c) 2005, 2007, 2008, 2009, 2011, 2012’ and a copyright
+statement that reads ‘Copyright (c) 2005-2012’ should be interpreted as being
+identical to a statement that reads ‘Copyright (c) 2005, 2006, 2007, 2008,
+2009, 2010, 2011, 2012’."
+```
+
+<!-- References -->
+[libBigWig]: https://github.com/dpryan79/libBigWig
+[BigWig]: https://genome.ucsc.edu/goldenpath/help/bigWig.html
+[htslib]: https://github.com/samtools/htslib
+[dockstore]: https://dockstore.org/tools
+[quay.io]: https://quay.io/repository/wtsicgp/dockstore-cgpbigwig
+[dockstore-cgpbigwig]: https://github.com/cancerit/dockstore-cgpbigwig/
+
+<!-- Travis links -->
+[travis-master]: https://travis-ci.org/cancerit/cgpBigWig.svg?branch=master
+[travis-develop]: https://travis-ci.org/cancerit/cgpBigWig.svg?branch=develop
+[travis-base]: https://travis-ci.org/cancerit/cgpBigWig

@@ -1,43 +1,80 @@
-# Install
+# Installation
 
-`./setup.sh /install/to/here`
+`./setup.sh /path/to/installation`
 
-`'/install/to/here'` is where you want the bin/lib folders to be created.
+`/path/to/installation` is where you want the `bin`, `lib` directories to be created.
+The following tools will be installed: `bwjoin`, `bwcat`, `bam2bw`, `bam2bwbases`, `bg2bw` and `bam2bedgraph`
 
-setup.sh will install:
+:warning:  **This distribution will only work on `*NIX` type systems.**
 
-- cgpBigWig tools bwjoin, bwcat, bam2bw, bam2bwbases and bam2bedgraph
-
-## OS
-  This distribution will only work on \*NIX type systems at present.
-
-## Other Software
+## System Dependencies
 
 For installation to proceed you require the following packages:
 
-### Ubuntu
-
-(tested with 14.04)
+### Ubuntu 14.04
 
 ```
 apt-get update && \
 apt-get -y install \
-build-essential zlib1g-dev libncurses5-dev libcurl4-gnutls-dev libssl-dev nettle-dev libbz2-dev liblzma-dev &&\
+
+            build-essential \
+            zlib1g-dev \
+            libncurses5-dev \
+            libcurl4-gnutls-dev \
+            libssl-dev \
+            nettle-dev \
+            libbz2-dev \
+            liblzma-dev \
+            &&\
+
 apt-get clean
 ```
 
-### Amazon Linux AMI
+### Ubuntu 16.04
 
-(2016.03.3 x86_64)
+```
+apt-get update && \
+apt-get -y install \
+
+            build-essential \
+            libbz2-dev \
+            libcurl4-gnutls-dev \
+            libgnutls-dev \
+            liblzma-dev \
+            libncurses5-dev \
+            libssl-dev \
+            nettle-dev \
+            zlib1g-dev \
+            libp11-kit-dev \
+            libtasn1-dev \
+            && \            
+
+apt-get clean
+```
+
+
+### Amazon Linux AMI (2016.03.3 x86_64)
 
 ```
 yum -q -y update && \
 yum -y install \
-make glibc-devel gcc patch ncurses-devel openssl-devel libcurl-devel gnutls-devel libtasn1-devel p11-kit-devel gmp-devel nettle-devel libbz2-devel liblzma-devel
+          make  \
+          glibc-devel \
+          gcc \
+          patch \
+          ncurses-devel \
+          openssl-devel \
+          libcurl-devel \
+          gnutls-devel \
+          libtasn1-devel \
+          p11-kit-devel \
+          gmp-devel \
+          nettle-devel \
+          libbz2-devel \
+          liblzma-devel
 ```
 
 **Should nettle-devel not exist**
-Use the following
 
 ```
 yum -q -y install autoconf ghostscript texinfo-tex
