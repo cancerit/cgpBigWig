@@ -8,18 +8,18 @@ Package of C scripts for generation of [BigWig][BigWig] coverage files
 
 ## Contents
 
-- [cgpBigWig](#cgpbigwig)
-  - [Contents](#contents)
-  - [Installation](#installation)
-  - [Docker](#docker)
-  - [Programs](#programs)
-   - [bwcat](#bwcat)
-   - [bwjoin](#bwjoin)
-   - [bam2bw](#bam2bw)
-   - [bg2bw](#bg2bw)
-   - [bam2bwbases](#bam2bwbases)
-   - [bam2bedgraph](#bam2bedgraph)
-  - [License](#license)
+-   [cgpBigWig](#cgpbigwig)
+    -   [Contents](#contents)
+    -   [Installation](#installation)
+    -   [Docker](#docker)
+    -   [Programs](#programs)
+        -   [bwcat](#bwcat)
+        -   [bwjoin](#bwjoin)
+        -   [bam2bw](#bam2bw)
+        -   [bg2bw](#bg2bw)
+        -   [bam2bwbases](#bam2bwbases)
+        -   [bam2bedgraph](#bam2bedgraph)
+    -   [License](#license)
 
 ## Installation
 
