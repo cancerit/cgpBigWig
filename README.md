@@ -11,7 +11,7 @@ Package of C scripts for generation of [BigWig][BigWig] coverage files
 -   [cgpBigWig](#cgpbigwig)
     -   [Contents](#contents)
     -   [Installation](#installation)
-    -   [Docker](#docker)
+    -   [Docker](#docker_and_singularity)
     -   [Programs](#programs)
         -   [bwcat](#bwcat)
         -   [bwjoin](#bwjoin)
@@ -36,9 +36,11 @@ To install this package run:
 
 :warning: Please review the respective licence for each before use.
 
-## Docker
+## Docker and Singularity
 
-There is a pre-built image containing this codebase on [quay.io], [dockstore-cgpbigwig] and via [dockstore]
+There are [docker][quay.io] and [dockstore.org][dockstore] wrappers for this project at [dockstore-cgpbigwig] including CWL bindings.
+
+See the [dockstore-cgpbigwig] documentation for more detail.
 
 ## Programs
 
