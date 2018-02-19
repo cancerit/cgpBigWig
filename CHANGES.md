@@ -2,10 +2,10 @@
 
 ## NEXT
 
-- Update to HTSlib 1.5 (for consistency across tools)
-- Update to libBigWig 0.4.2
-- Some README.md and INSTALL.md updates
-  - Thanks go to [jsmedmar](https://github.com/jsmedmar) for documentation contributions
+-   Update to HTSlib 1.5 (for consistency across tools)
+-   Update to libBigWig 0.4.2
+-   Some README.md and INSTALL.md updates
+    -   Thanks go to [jsmedmar](https://github.com/jsmedmar) for documentation contributions
 
 ## 0.4.4
 
