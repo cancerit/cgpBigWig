@@ -19,7 +19,6 @@ Package of C scripts for generation of [BigWig][BigWig] coverage files
    - [bg2bw](#bg2bw)
    - [bam2bwbases](#bam2bwbases)
    - [bam2bedgraph](#bam2bedgraph)
-  - [Contributing](#contributing)
   - [License](#license)
 
 ## Installation
