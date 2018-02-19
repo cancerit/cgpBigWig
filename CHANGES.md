@@ -1,6 +1,6 @@
 # CHANGES
 
-## NEXT
+## 0.5.0
 
 -   Update to HTSlib 1.5 (for consistency across tools)
 -   Update to libBigWig 0.4.2
