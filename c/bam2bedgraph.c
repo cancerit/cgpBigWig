@@ -214,8 +214,7 @@ int main(int argc, char *argv[]){
   check(out!=NULL,"Failed to open output file for %s writing.",output_file);
   tmp.out = out;
   int check = 0;
-	int (func*)(uint32_t tid, uint32_t position, int n, const bam_pileup1_t *pl, void *data);
-	func = &pileup_func
+	bw_func func = &pileup_func
 	if(is_overlap == 1){
 		func = &pileup_func_overlap;
 	}

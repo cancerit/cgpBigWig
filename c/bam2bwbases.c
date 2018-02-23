@@ -419,8 +419,7 @@ int main(int argc, char *argv[]){
 	uint32_t sto;
 	char *contig;
 
-	int (func*)(uint32_t tid, uint32_t position, int n, const bam_pileup1_t *pl, void *data, uint32_t reg_start);
-	func = &perbase_pileup_func;
+	bw_func func = &perbase_pileup_func;
 	if(is_overlap == 1){
 		func = &perbase_pileup_func_overlap;
 	}
