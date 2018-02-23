@@ -11,7 +11,7 @@ Package of C scripts for generation of [BigWig][BigWig] coverage files
 -   [cgpBigWig](#cgpbigwig)
     -   [Contents](#contents)
     -   [Installation](#installation)
-    -   [Docker](#docker_and_singularity)
+    -   [Docker](#docker-and-singularity)
     -   [Programs](#programs)
         -   [bwcat](#bwcat)
         -   [bwjoin](#bwjoin)
@@ -99,6 +99,7 @@ Optional:
 -c  --region [file]                               A samtools style region (contig:start-stop) or a bed file of regions over which to produce the bigwig file
 -z  --include-zeroes                              Include zero coverage regions as additional entries to the bw file
 -r  --reference [file]                            Path to reference genome.fa file (required for cram if ref_path cannot be resolved)
+-a  --overlap                                     Turn on overlaping reads check
 
 Other:
 -h  --help                                        Display this usage information.
@@ -129,6 +130,7 @@ bam2bwbases can be used to generate four bw files of per base proportions.
 -i  --input [file]                                Path to the input [b|cr]am file.
 -F  --filter [int]                                SAM flags to filter. [default: 4]
 -o  --outfile [file]                              Path to the output .bw file produced. Per base results wiillbe output as four bw files [ACGT].outputname.bw [default:'(null)']
+-a  --overlap                                     Turn on overlaping reads check
 
 Optional:
 -c  --region [file]                               A samtools style region (contig:start-stop) or a bed file of regions over which to produce the bigwig file
@@ -151,6 +153,8 @@ Create a BEDGraph file of genomic coverage. BAM file must be sorted.
 Optional:
 -r --region    Region in bam to access.
 -f --filter    Ignore reads with the filter flags [int].
+-a --overlap  Turn on overlaping reads check
+
 Other:
 -h --help      Display this usage information.
 -v --version   Prints the version number.
