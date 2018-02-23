@@ -270,6 +270,7 @@ static int perbase_pileup_func_overlap(uint32_t tid, uint32_t position, int n, c
     tmp->lbaseprop     = result;
   }
   tmp->lpos = pos;
+	kh_destroy(strh, h);
   return 0;
 }
 
