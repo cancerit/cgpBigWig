@@ -1,5 +1,5 @@
 /**   LICENSE
-* Copyright (c) 2016 Genome Research Ltd.
+* Copyright (c) 2016-2018 Genome Research Ltd.
 *
 * Author: Cancer Genome Project cgpit@sanger.ac.uk
 *
@@ -40,6 +40,8 @@
 #include "bam_access.h"
 #include "utils.h"
 
+KHASH_MAP_INIT_STR(strh,uint8_t)
+
 char *out_file = "output.bam.bw";
 char *input_file = NULL;
 char *region_store = NULL;
@@ -50,6 +52,7 @@ int is_regions_file = 0;
 uint8_t is_base = 0;
 int filter = 4;
 char base = 0;
+uint8_t is_overlap = 0;
 int include_zeroes = 0;
 uint32_t single = 1;
 char *last_contig = "";
@@ -63,7 +66,8 @@ void print_usage (int exit_code){
 	printf("Optional: \n");
 	printf("-c  --region [file]                               A samtools style region (contig:start-stop) or a bed file of regions over which to produce the bigwig file\n");
 	printf("-z  --include-zeroes                              Include zero coverage regions as additional entries to the bw file\n");
-	printf("-r  --reference [file]                            Path to reference genome.fa file (required for cram if ref_path cannot be resolved)\n\n");
+	printf("-r  --reference [file]                            Path to reference genome.fa file (required for cram if ref_path cannot be resolved)\n");
+	printf("-a  --overlap                                     Use overlapping read check\n\n");
   printf ("Other:\n");
 	printf("-h  --help                                        Display this usage information.\n");
 	printf("-v  --version                                     Prints the version number.\n\n");
@@ -98,6 +102,7 @@ void setup_options(int argc, char *argv[]){
              	{"region",required_argument, 0, 'c'},
              	{"reference",required_argument, 0, 'r'},
              	{"include-zeroes",no_argument, 0, 'z'},
+							{"overlap", no_argument, 0, 'a'},
              	{"help", no_argument, 0, 'h'},
              	{"version", no_argument, 0, 'v'},
              	{ NULL, 0, NULL, 0}
@@ -108,7 +113,7 @@ void setup_options(int argc, char *argv[]){
    int iarg = 0;
 
    //Iterate through options
-   while((iarg = getopt_long(argc, argv, "F:i:o:c:r:zhv",long_opts, &index)) != -1){
+   while((iarg = getopt_long(argc, argv, "F:i:o:c:r:azhv",long_opts, &index)) != -1){
     switch(iarg){
       case 'F':
         if(sscanf(optarg, "%i", &filter) != 1){
@@ -147,6 +152,9 @@ void setup_options(int argc, char *argv[]){
 			case 'z':
 			  include_zeroes  = 1;
 			  break;
+			case 'a':
+				is_overlap = 1;
+				break;
 			case '?':
         print_usage (1);
         break;
@@ -202,6 +210,67 @@ static int pileup_func(uint32_t tid, uint32_t position, int n, const bam_pileup1
   tmp->lpos = pos;
   return 0;
 error:
+  return 1;
+}
+
+// callback for bam_plbuf_init() for overlapping reads
+static int pileup_func_overlap(uint32_t tid, uint32_t position, int n, const bam_pileup1_t *pl, void *data, uint32_t reg_start){
+  tmpstruct_t *tmp = (tmpstruct_t*)data;
+  int pos          = (int)position;
+  int coverage     = n;
+  int i;
+
+	khash_t(strh) *h;
+	khiter_t k;
+	h = kh_init(strh);
+
+  for (i=0;i<n;i++){
+    if (pl[i].is_del){
+			coverage--;
+			continue;
+		}
+		int absent;
+		//Testing overlapping reads
+		k = kh_put(strh, h, bam_get_qname(pl[i]->b), &absent);
+		uint8_t cbase = bam_seqi(bam_get_seq(pl[i]->b),pl[i]->qpos);
+		uint8_t pre_b;
+		if(!absent){ //Read already processed to get base processed (we only increment if base is different between overlapping read pairs)
+			k = kh_get(strh, h, bam_get_qname(p->b));
+			pre_b = kh_val(h,k);
+		}else{
+			//Add the value to the hash
+			kh_value(h, k) = cbase;
+		}
+		if(!absent && pre_b == cbase) coverage--; //Remove one from the total coverage if this is an overlap site
+	}
+
+  if((uint32_t)pos == reg_start-1){
+    tmp->ltid       = tid;
+    tmp->lstart     = pos;
+    tmp->lcoverage  = coverage;
+  }
+  if (tmp->ltid != tid || tmp->lcoverage != coverage || pos > tmp->lpos+1) {
+    if (tmp->inczero == 1 || tmp->lcoverage > 0 ){
+      uint32_t start =  tmp->lstart;
+      uint32_t stop = pos;
+      float cvg = (float)tmp->lcoverage;
+			if(tmp->lcoverage == 0 && tmp->ltid != tid-1 && tmp->ltid != tid){
+				tmp->ltid = tid;
+			}
+      int chck = bwAddIntervals(tmp->bwout,
+									&tmp->head->target_name[tmp->ltid],&start,&stop,&cvg,single);
+      check(chck==0,"Error adding bw interval %s:%"PRIu32"-%"PRIu32" = %f . Error code: %d",tmp->head->target_name[tmp->ltid],start,stop,cvg,chck);
+    }
+    //if(tmp->inczero == 1 && tmp->ltid != tid && pos != tmp->head->target_len[tmp->ltid]){
+    tmp->ltid       = tid;
+    tmp->lstart     = pos;
+    tmp->lcoverage  = coverage;
+  }
+  tmp->lpos = pos;
+	kh_destroy(strh, h);
+  return 0;
+error:
+	kh_destroy(strh, h);
   return 1;
 }
 
@@ -360,9 +429,13 @@ int main(int argc, char *argv[]){
   float cvg;
   //Now we generate the bw info
   int chck = 0;
+	bw_func func = &pileup_func;
+	if(is_overlap==1){
+		func = &pileup_func_overlap;
+	}
   int i=0;
 	for(i=0;i<no_of_regions;i++){
-	  chck = process_bam_region(input_file, pileup_func, &tmp, filter,  our_region_list[i], reference);
+	  chck = process_bam_region(input_file, func, &tmp, filter,  our_region_list[i], reference);
 	  check(chck==1,"Error parsing bam region.");
 	  start =  tmp.lstart;
     stop = tmp.lpos+1;
