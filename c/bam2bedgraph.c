@@ -214,7 +214,7 @@ int main(int argc, char *argv[]){
   check(out!=NULL,"Failed to open output file for %s writing.",output_file);
   tmp.out = out;
   int check = 0;
-	bw_func func = &pileup_func
+	bw_func func = &pileup_func;
 	if(is_overlap == 1){
 		func = &pileup_func_overlap;
 	}
