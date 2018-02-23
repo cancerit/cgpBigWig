@@ -215,14 +215,16 @@ int main(int argc, char *argv[]){
   tmp.out = out;
   int check = 0;
 	bw_func func = &pileup_func;
+	bw_func_reg func_reg = &pileup_func;
 	if(is_overlap == 1){
 		func = &pileup_func_overlap;
+		func_reg = &pileup_func_overlap;
 	}
 	if(region == NULL){
-	  check = process_bam_file(input_file,func, &tmp,filter,NULL);
+	  check = process_bam_file(input_file, func, &tmp, filter, NULL);
 	  check(check==1,"Error parsing bam file.");
 	}else{
-		check = process_bam_region(input_file, func, &tmp, filter, region,NULL);
+		check = process_bam_region(input_file, func_reg, &tmp, filter, region, NULL);
     check(check==1,"Error parsing bam region.");
 	}
   fprintf(out,"%s\t%d\t%d\t%d\n", tmp.head->target_name[tmp.ltid], tmp.lstart,tmp.lpos+1, tmp.lcoverage);

@@ -430,12 +430,14 @@ int main(int argc, char *argv[]){
   //Now we generate the bw info
   int chck = 0;
 	bw_func func = &pileup_func;
+	bw_func_reg func_reg = &pileup_func;
 	if(is_overlap==1){
 		func = &pileup_func_overlap;
+		func_reg = &pileup_func_overlap;
 	}
   int i=0;
 	for(i=0;i<no_of_regions;i++){
-	  chck = process_bam_region(input_file, func, &tmp, filter,  our_region_list[i], reference);
+	  chck = process_bam_region(input_file, func_reg, &tmp, filter,  our_region_list[i], reference);
 	  check(chck==1,"Error parsing bam region.");
 	  start =  tmp.lstart;
     stop = tmp.lpos+1;

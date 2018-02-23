@@ -420,8 +420,10 @@ int main(int argc, char *argv[]){
 	char *contig;
 
 	bw_func func = &perbase_pileup_func;
-	if(is_overlap == 1){
+	bw_func_reg func_reg = &perbase_pileup_func;
+	if(is_overlap==1){
 		func = &perbase_pileup_func_overlap;
+		func_reg = &perbase_pileup_func_overlap;
 	}
 
   int i=0;
@@ -432,7 +434,7 @@ int main(int argc, char *argv[]){
       perbase[k].reg_start = sta;
       perbase[k].reg_stop = sto;
     }
-	  chck = process_bam_region_bases(input_file, perbase_pileup_func, perbase, filter,  our_region_list[i], reference);
+	  chck = process_bam_region_bases(input_file, func_reg, perbase, filter,  our_region_list[i], reference);
 	  check(chck==1,"Error processing bam region.");
     int b=0;
     for(b=0;b<4;b++){
