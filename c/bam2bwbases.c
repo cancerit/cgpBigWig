@@ -419,10 +419,8 @@ int main(int argc, char *argv[]){
 	uint32_t sto;
 	char *contig;
 
-	bw_func func = &perbase_pileup_func;
 	bw_func_reg func_reg = &perbase_pileup_func;
 	if(is_overlap==1){
-		func = &perbase_pileup_func_overlap;
 		func_reg = &perbase_pileup_func_overlap;
 	}
 

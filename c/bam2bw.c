@@ -429,10 +429,8 @@ int main(int argc, char *argv[]){
   float cvg;
   //Now we generate the bw info
   int chck = 0;
-	bw_func func = &pileup_func;
 	bw_func_reg func_reg = &pileup_func;
 	if(is_overlap==1){
-		func = &pileup_func_overlap;
 		func_reg = &pileup_func_overlap;
 	}
   int i=0;
