@@ -177,11 +177,11 @@ static int pileup_func_overlap(uint32_t tid, uint32_t position, int n, const bam
 		}
 		int absent;
 		//Testing overlapping reads
-		k = kh_put(strh, h, bam_get_qname(pl[i]->b), &absent);
-		uint8_t cbase = bam_seqi(bam_get_seq(pl[i]->b),pl[i]->qpos);
+		k = kh_put(strh, h, bam_get_qname(pl[i].b), &absent);
+		uint8_t cbase = bam_seqi(bam_get_seq(pl[i].b),pl[i].qpos);
 		uint8_t pre_b;
 		if(!absent){ //Read already processed to get base processed (we only increment if base is different between overlapping read pairs)
-			k = kh_get(strh, h, bam_get_qname(p->b));
+			k = kh_get(strh, h, bam_get_qname(pl[i].b));
 			pre_b = kh_val(h,k);
 		}else{
 			//Add the value to the hash
