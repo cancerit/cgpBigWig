@@ -1,9 +1,9 @@
 #!/bin/bash
 
 ########## LICENSE ##########
-# Copyright (c) 2016 Genome Research Ltd.
+# Copyright (c) 2016-2018 Genome Research Ltd.
 #
-# Author: Cancer Genome Project cgpit@sanger.ac.uk
+# Author: Cancer Genome Project cgphelp@sanger.ac.uk
 #
 # This file is part of cgpBigWig.
 #
@@ -134,6 +134,74 @@ then
 fi
 
 diff ../test_data/tmp.out ../test_data/coverage.region.expected.bed
+if [ "$?" != "0" ];
+then
+  echo "ERROR in "$0": Total file comparisons don't match"
+	echo "------"
+	rm -f ../test_data/tmp.out ../test_data/expected.tmp.out
+  exit 1
+fi
+
+rm -f ../test_data/tmp.out ../test_data/expected.tmp.out ../test_data/tmp.bw
+
+# Test without overlap
+../bin/bam2bw -i ../test_data/TEST_wsig_overlap.bam -o ../test_data/tmp.bw;
+if [ "$?" != "0" ];
+then
+  echo "ERROR in "$0": Running bam2bw overlap (no overlap)"
+	echo "------"
+	rm -f ../test_data/tmp.bw
+  exit 1
+fi
+
+../bin/bwcat -i ../test_data/tmp.bw > ../test_data/tmp.out
+if [ "$?" != "0" ];
+then
+  echo "ERROR running ../bin/bwcat -i ../test_data/tmp.bw > ../test_data/tmp.out"
+  exit 1;
+fi
+../bin/bwcat -i ../test_data/TEST_wsig_overlap_bam2bw_no_overlap_expected.bw > ../test_data/expected.tmp.out
+if [ "$?" != "0" ];
+then
+  echo "ERROR running ../bin/bwcat -i ../test_data/TEST_wsig_overlap_bam2bw_no_overlap_expected.bw > ../test_data/expected.tmp.out"
+  exit 1;
+fi
+
+diff ../test_data/tmp.out ../test_data/expected.tmp.out
+if [ "$?" != "0" ];
+then
+  echo "ERROR in "$0": Total file comparisons don't match"
+	echo "------"
+	rm -f ../test_data/tmp.out ../test_data/expected.tmp.out
+  exit 1
+fi
+
+rm -f ../test_data/tmp.out ../test_data/expected.tmp.out ../test_data/tmp.bw
+
+#Test with overlap
+../bin/bam2bw -i ../test_data/TEST_wsig_overlap.bam -a -o ../test_data/tmp.bw;
+if [ "$?" != "0" ];
+then
+  echo "ERROR in "$0": Running bam2bw overlap (no overlap)"
+	echo "------"
+	rm -f ../test_data/tmp.bw
+  exit 1
+fi
+
+../bin/bwcat -i ../test_data/tmp.bw > ../test_data/tmp.out
+if [ "$?" != "0" ];
+then
+  echo "ERROR running ../bin/bwcat -i ../test_data/tmp.bw > ../test_data/tmp.out"
+  exit 1;
+fi
+../bin/bwcat -i ../test_data/TEST_wsig_overlap_bam2bw_with_overlap_expected.bw > ../test_data/expected.tmp.out
+if [ "$?" != "0" ];
+then
+  echo "ERROR running ../bin/bwcat -i ../test_data/TEST_wsig_overlap_bam2bw_with_overlap_expected.bw > ../test_data/expected.tmp.out"
+  exit 1;
+fi
+
+diff ../test_data/tmp.out ../test_data/expected.tmp.out
 if [ "$?" != "0" ];
 then
   echo "ERROR in "$0": Total file comparisons don't match"
