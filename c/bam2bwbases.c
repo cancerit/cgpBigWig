@@ -1,7 +1,7 @@
 /**   LICENSE
 * Copyright (c) 2016-2018 Genome Research Ltd.
 *
-* Author: Cancer Genome Project cgpit@sanger.ac.uk
+* Author: Cancer Genome Project cgphelp@sanger.ac.uk
 *
 * This file is part of cgpBigWig.
 *
@@ -240,7 +240,10 @@ static int perbase_pileup_func_overlap(uint32_t tid, uint32_t position, int n, c
 				//Add the value to the hash
 				kh_value(h, k) = cbase;
 			}
-			if(!absent && pre_b == cbase) continue; //Skip as we've already counted this base once in the overlapping reads
+			if(!absent && pre_b == cbase){
+				coverage--;
+				continue;
+			}
 			if(cbase == tmp->base_bit) base_coverage++;
     }
   }
