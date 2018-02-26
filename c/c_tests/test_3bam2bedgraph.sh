@@ -1,9 +1,9 @@
 #!/bin/bash
 
 ########## LICENSE ##########
-# Copyright (c) 2016 Genome Research Ltd.
+# Copyright (c) 2016-2018 Genome Research Ltd.
 #
-# Author: Cancer Genome Project cgpit@sanger.ac.uk
+# Author: Cancer Genome Project cgphelp@sanger.ac.uk
 #
 # This file is part of cgpBigWig.
 #
@@ -51,6 +51,40 @@ if [ "$?" != "0" ];
 then
   rm -f ../test_data/tmp.bed;
   error_exit "ERROR in "$0" running ../test_data/tmp.bed ../test_data/volvox-sorted.coverage.expected.bed: Total bed file comparisons don't match";
+fi
+
+rm -f ../test_data/tmp.bed
+
+#Test without overlap
+../bin/bam2bedgraph -i ../test_data/TEST_wsig_overlap.bam -o ../test_data/tmp.bed;
+if [ "$?" != "0" ];
+then
+  rm -f ../test_data/tmp.bed
+  error_exit "ERROR in "$0": Running bam2bedgraph"
+fi
+
+diff ../test_data/tmp.bed ../test_data/TEST_wsig_overlap_bam2bg_no_overlap_expected.bed;
+if [ "$?" != "0" ];
+then
+  rm -f ../test_data/tmp.bed;
+  error_exit "ERROR in "$0" running ../test_data/tmp.bed ../test_data/TEST_wsig_overlap_bam2bg_no_overlap.bed: Total bed file comparisons don't match";
+fi
+
+rm -f ../test_data/tmp.bed
+
+#Test with overlap
+../bin/bam2bedgraph -i ../test_data/TEST_wsig_overlap.bam -a -o ../test_data/tmp.bed;
+if [ "$?" != "0" ];
+then
+  rm -f ../test_data/tmp.bed
+  error_exit "ERROR in "$0": Running bam2bedgraph"
+fi
+
+diff ../test_data/tmp.bed ../test_data/TEST_wsig_overlap_bam2bg_with_overlap_expected.bed;
+if [ "$?" != "0" ];
+then
+  rm -f ../test_data/tmp.bed;
+  error_exit "ERROR in "$0" running ../test_data/tmp.bed ../test_data/TEST_wsig_overlap_bam2bg_with_overlap.bed: Total bed file comparisons don't match";
 fi
 
 rm -f ../test_data/tmp.bed

@@ -1,9 +1,9 @@
 #!/bin/bash
 
 ########## LICENSE ##########
-# Copyright (c) 2016 Genome Research Ltd.
+# Copyright (c) 2016-2018 Genome Research Ltd.
 #
-# Author: Cancer Genome Project cgpit@sanger.ac.uk
+# Author: Cancer Genome Project cgphelp@sanger.ac.uk
 #
 # This file is part of cgpBigWig.
 #
@@ -64,6 +64,80 @@ do
   if  [ "$?" != "0" ];
   then
     error_exit "ERROR running ../bin/bwcat -i ../test_data/$b.expected.bases.bw > ../test_data/$b.bases.exp.bed";
+  fi
+
+  ../bin/bwcat -i ../test_data/$b.tmp.bases.bw > ../test_data/$b.bases.got.bed;
+  if  [ "$?" != "0" ];
+  then
+    error_exit "ERROR running ../bin/bwcat -i ../test_data/$b.tmp.bases.bw > ../test_data/$b.bases.got.bed";
+  fi
+
+  diff ../test_data/$b.bases.exp.bed ../test_data/$b.bases.got.bed;
+  if  [ "$?" != "0" ];
+  then
+    rm -f ../test_data/*tmp.bases.bw;
+    rm -f ../test_data/*.bases.got.bed;
+    rm -f ../test_data/*.bases.exp.bed;
+    error_exit "ERROR in "$0" running diff for bases ../test_data/$b.bases.exp.bed ../test_data/$b.bases.got.bed : Region bed file comparisons don't match";
+  fi
+done
+
+rm -f ../test_data/*tmp.bases.bw;
+rm -f ../test_data/*.bases.got.bed;
+rm -f ../test_data/*.bases.exp.bed;
+
+#Test without overlap
+../bin/bam2bwbases -i ../test_data/TEST_wsig_overlap.bam -o ../test_data/tmp.bases.bw -F3844;
+if [ "$?" != "0" ];
+then
+  rm -f ../test_data/*tmp.bases.bw;
+  error_exit "ERROR in "$0": Running bam2bwbases"
+fi
+
+for b in ${bases[@]}
+do
+  ../bin/bwcat -i ../test_data/$b.TEST_wsig_overlap_bam2bwbases_no_overlap_expected.bw > ../test_data/$b.bases.exp.bed;
+  if  [ "$?" != "0" ];
+  then
+    error_exit "ERROR running ../bin/bwcat -i ../test_data/$b.TEST_wsig_overlap_bam2bwbases_no_overlap_expected.bw > ../test_data/$b.bases.exp.bed";
+  fi
+
+  ../bin/bwcat -i ../test_data/$b.tmp.bases.bw > ../test_data/$b.bases.got.bed;
+  if  [ "$?" != "0" ];
+  then
+    error_exit "ERROR running ../bin/bwcat -i ../test_data/$b.tmp.bases.bw > ../test_data/$b.bases.got.bed";
+  fi
+
+  diff ../test_data/$b.bases.exp.bed ../test_data/$b.bases.got.bed;
+  if  [ "$?" != "0" ];
+  then
+    rm -f ../test_data/*tmp.bases.bw;
+    rm -f ../test_data/*.bases.got.bed;
+    rm -f ../test_data/*.bases.exp.bed;
+    error_exit "ERROR in "$0" running diff for bases ../test_data/$b.bases.exp.bed ../test_data/$b.bases.got.bed : Region bed file comparisons don't match";
+  fi
+done
+
+
+rm -f ../test_data/*tmp.bases.bw;
+rm -f ../test_data/*.bases.got.bed;
+rm -f ../test_data/*.bases.exp.bed;
+
+
+#Test with overlap
+../bin/bam2bwbases -i ../test_data/TEST_wsig_overlap.bam -a -o ../test_data/tmp.bases.bw -F3844;
+if [ "$?" != "0" ];
+then
+  rm -f ../test_data/*tmp.bases.bw;
+  error_exit "ERROR in "$0": Running bam2bwbases"
+fi
+
+for b in ${bases[@]}
+do
+  ../bin/bwcat -i ../test_data/$b.TEST_wsig_overlap_bam2bwbases_with_overlap_expected.bw > ../test_data/$b.bases.exp.bed;
+  if  [ "$?" != "0" ];
+  then
+    error_exit "ERROR running ../bin/bwcat -i ../test_data/$b.TEST_wsig_overlap_bam2bwbases_with_overlap_expected.bw > ../test_data/$b.bases.exp.bed";
   fi
 
   ../bin/bwcat -i ../test_data/$b.tmp.bases.bw > ../test_data/$b.bases.got.bed;

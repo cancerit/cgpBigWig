@@ -1,5 +1,13 @@
 # CHANGES
 
+## NEXT
+
+- First full release
+- Add overlapping reads support to `bam2bw`, `bam2bwbases` and `bam2bedgraph` via commandline flag `--overlap` `-a`
+  - If the same readname is encountered twice at a position it is considred an overlapping read pair.
+  - Where the same base [ACGT] was encountered on each of the reads it will only be counted once. If a different base was encountered then the coverage count is incremented once for each base.
+- Updated License headers with new email address 
+
 ## 0.5.0
 
 -   Update to HTSlib 1.5 (for consistency across tools)
