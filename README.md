@@ -6,20 +6,20 @@ Package of C scripts for generation of [BigWig][BigWig] coverage files
 |-----------------------------------------------|----------------------------------------------|
 | [![Master Badge][travis-master]][travis-base] |  [![Dev Badge][travis-develop]][travis-base] |
 
-## Contents
+<!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
--   [cgpBigWig](#cgpbigwig)
-    -   [Contents](#contents)
-    -   [Installation](#installation)
-    -   [Docker](#docker-and-singularity)
-    -   [Programs](#programs)
-        -   [bwcat](#bwcat)
-        -   [bwjoin](#bwjoin)
-        -   [bam2bw](#bam2bw)
-        -   [bg2bw](#bg2bw)
-        -   [bam2bwbases](#bam2bwbases)
-        -   [bam2bedgraph](#bam2bedgraph)
-    -   [License](#license)
+- [Installation](#installation)
+- [Docker and Singularity](#docker-and-singularity)
+- [Programs](#programs)
+	- [bwcat](#bwcat)
+	- [bwjoin](#bwjoin)
+	- [bam2bw](#bam2bw)
+	- [bg2bw](#bg2bw)
+	- [bam2bwbases](#bam2bwbases)
+	- [bam2bedgraph](#bam2bedgraph)
+- [License](#license)
+
+<!-- /TOC -->
 
 ## Installation
 
@@ -85,7 +85,7 @@ Other:
 -v --version   Prints the version number.
 ```
 
-##### bam2bw
+### bam2bw
 Generate bw coverage file from bam
 ```
 Usage: bam2bw -i input.[b|cr]am -o output.bw
@@ -164,7 +164,7 @@ Other:
 ```
 Copyright (c) 2017-2018 Genome Research Ltd.
 
-Author: David Jones <cgpit@sanger.ac.uk>
+Author: David Jones <cgphelp@sanger.ac.uk>
 
 This file is part of cgpBigWig.
 
