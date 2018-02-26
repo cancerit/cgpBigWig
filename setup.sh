@@ -3,7 +3,7 @@
 ########## LICENSE ##########
 # Copyright (c) 2016 Genome Research Ltd.
 #
-# Author: Cancer Genome Project cgpit@sanger.ac.uk
+# Author: Cancer Genome Project cgphelp@sanger.ac.uk
 #
 # This file is part of cgpBigWig.
 #
