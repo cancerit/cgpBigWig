@@ -53,6 +53,7 @@ uint8_t is_base = 0;
 uint8_t is_overlap = 0;
 int filter = 4;
 char base = 0;
+int nthreads = 0; // shared pool
 uint32_t single = 1;
 
 void print_usage (int exit_code){
@@ -64,6 +65,7 @@ void print_usage (int exit_code){
 	printf("Optional: \n");
 	printf("-c  --region [file]                               A samtools style region (contig:start-stop) or a bed file of regions over which to produce the bigwig file\n");
 	printf("-r  --reference [file]                            Path to reference genome.fa file (required for cram if ref_path cannot be resolved)\n");
+	printf("-@  --num_threads [int]                           Use thread pool with specified number of threads.\n");
 	printf("-a  --overlap                                     Use overlapping read check\n\n");
   printf ("Other:\n");
 	printf("-h  --help                                        Display this usage information.\n");
@@ -99,6 +101,7 @@ void setup_options(int argc, char *argv[]){
              	{"region",required_argument, 0, 'c'},
              	{"reference",required_argument, 0, 'r'},
 							{"overlap", no_argument, 0, 'a'},
+							{"num_threads",required_argument,0,'@'},
              	{"help", no_argument, 0, 'h'},
              	{"version", no_argument, 0, 'v'},
              	{ NULL, 0, NULL, 0}
@@ -109,24 +112,21 @@ void setup_options(int argc, char *argv[]){
    int iarg = 0;
 
    //Iterate through options
-   while((iarg = getopt_long(argc, argv, "F:i:o:c:r:ahv",long_opts, &index)) != -1){
+   while((iarg = getopt_long(argc, argv, "F:i:o:c:r:@:ahv",long_opts, &index)) != -1){
     switch(iarg){
       case 'F':
-        if(sscanf(optarg, "%i", &filter) != 1){
-      		fprintf(stderr,"Error parsing -F|--filter argument '%s'. Should be an integer > 0",optarg);
-      		print_usage(1);
-      	}
+        check(sscanf(optarg, "%i", &filter)==1, "Error parsing -F|--filter argument '%s'. Should be an integer > 0",optarg);
         break;
    		case 'i':
 				input_file = optarg;
-				if(check_exist(input_file) != 1){
-          fprintf(stderr,"Input bam file %s does not appear to exist.\n",input_file);
-          print_usage(1);
-        }
+				check(check_exist(input_file)==1, "Input bam file %s does not appear to exist.\n",input_file);
    			break;
    		case 'o':
 				out_file = optarg;
    			break;
+			case '@':
+				check(sscanf(optarg, "%i", &nthreads)==1, "Error parsing -@ argument '%s'. Should be an integer > 0", optarg);
+				break;
 			case 'h':
 				print_usage (0);
 				break;
@@ -137,10 +137,7 @@ void setup_options(int argc, char *argv[]){
 			  region_store = optarg;
 			  //First check for a region format
 			  int res = check_region_string(region_store);
-        if(res<0){
-          fprintf(stderr,"Region %s is not in correct format or not an existing bed file.\n",region_store);
-          print_usage(1);
-        }
+        check(res>=0, "Region %s is not in correct format or not an existing bed file.\n",region_store);
 			  break;
 			case 'a':
 				is_overlap = 1;
@@ -157,15 +154,17 @@ void setup_options(int argc, char *argv[]){
 
    }//End of iteration through options
 
-  if(input_file==NULL){
-    fprintf(stderr,"Required option -i|--input-bam not defined.\n");
-    print_usage(1);
-  }
+  check(input_file!=NULL, "Required option -i|--input-bam not defined.\n");
 
   if(out_file == NULL){
     out_file = "output.bam.bw";
   }
-  return;
+
+  return 0;
+
+error:
+	print_usage (1);
+	return -1;
 }
 
 // callback for bam_plbuf_init()
@@ -296,7 +295,8 @@ error:
 }
 
 int main(int argc, char *argv[]){
-	setup_options(argc, argv);
+	int chk_opt = setup_options(argc, argv);
+	check(chk_opt==0,"Error parsing options");
 	tmpstruct_t *perbase = NULL;
 	int no_of_regions = 0;
 	int sq_lines = get_no_of_SQ_lines(input_file);
@@ -435,7 +435,7 @@ int main(int argc, char *argv[]){
       perbase[k].reg_start = sta;
       perbase[k].reg_stop = sto;
     }
-	  chck = process_bam_region_bases(input_file, func_reg, perbase, filter,  our_region_list[i], reference);
+	  chck = process_bam_region_bases(input_file, func_reg, perbase, filter,  our_region_list[i], nthreads, reference);
 	  check(chck==1,"Error processing bam region.");
     int b=0;
     for(b=0;b<4;b++){

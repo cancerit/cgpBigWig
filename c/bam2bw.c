@@ -54,6 +54,7 @@ int filter = 4;
 char base = 0;
 uint8_t is_overlap = 0;
 int include_zeroes = 0;
+int nthreads = 0; // shared pool
 uint32_t single = 1;
 char *last_contig = "";
 
@@ -67,6 +68,7 @@ void print_usage (int exit_code){
 	printf("-c  --region [file]                               A samtools style region (contig:start-stop) or a bed file of regions over which to produce the bigwig file\n");
 	printf("-z  --include-zeroes                              Include zero coverage regions as additional entries to the bw file\n");
 	printf("-r  --reference [file]                            Path to reference genome.fa file (required for cram if ref_path cannot be resolved)\n");
+	printf("-@  --num_threads [int]                           Use thread pool with specified number of threads.\n");
 	printf("-a  --overlap                                     Use overlapping read check\n\n");
   printf ("Other:\n");
 	printf("-h  --help                                        Display this usage information.\n");
@@ -93,7 +95,7 @@ int get_int_length(int input){
   return (input == 0 ? 1 : (int)(log10(input)+1));
 }
 
-void setup_options(int argc, char *argv[]){
+int setup_options(int argc, char *argv[]){
 	const struct option long_opts[] =
 	{
              	{"input", required_argument, 0, 'i'},
@@ -103,6 +105,7 @@ void setup_options(int argc, char *argv[]){
              	{"reference",required_argument, 0, 'r'},
              	{"include-zeroes",no_argument, 0, 'z'},
 							{"overlap", no_argument, 0, 'a'},
+							{"num_threads",required_argument,0,'@'},
              	{"help", no_argument, 0, 'h'},
              	{"version", no_argument, 0, 'v'},
              	{ NULL, 0, NULL, 0}
@@ -113,24 +116,21 @@ void setup_options(int argc, char *argv[]){
    int iarg = 0;
 
    //Iterate through options
-   while((iarg = getopt_long(argc, argv, "F:i:o:c:r:azhv",long_opts, &index)) != -1){
+   while((iarg = getopt_long(argc, argv, "F:i:o:c:r:@:azhv",long_opts, &index)) != -1){
     switch(iarg){
       case 'F':
-        if(sscanf(optarg, "%i", &filter) != 1){
-      		fprintf(stderr,"Error parsing -F|--filter argument '%s'. Should be an integer > 0",optarg);
-      		print_usage(1);
-      	}
+        check(sscanf(optarg, "%i", &filter)==1,"Error parsing -F|--filter argument '%s'. Should be an integer > 0",optarg);
         break;
    		case 'i':
 				input_file = optarg;
-				if(check_exist(input_file) != 1){
-          fprintf(stderr,"Input bam file %s does not appear to exist.\n",input_file);
-          print_usage(1);
-        }
+				check(check_exist(input_file)==1, "Input bam file %s does not appear to exist.\n",input_file);
    			break;
    		case 'o':
 				out_file = optarg;
    			break;
+			case '@':
+				check(sscanf(optarg, "%i", &nthreads)==1, "Error parsing -@ argument '%s'. Should be an integer > 0", optarg);
+				break;
 			case 'h':
 				print_usage (0);
 				break;
@@ -141,10 +141,7 @@ void setup_options(int argc, char *argv[]){
 			  region_store = optarg;
 			  //First check for a region format
 			  int res = check_region_string(region_store);
-        if(res<0){
-          fprintf(stderr,"Region %s is not in correct format or not an existing bed file.\n",region_store);
-          print_usage(1);
-        }
+				check(res>=0,"Region %s is not in correct format or not an existing bed file.\n",region_store);
 			  break;
 			case 'r':
 			  reference = optarg;
@@ -164,17 +161,16 @@ void setup_options(int argc, char *argv[]){
 
    }//End of iteration through options
 
-  if(input_file==NULL){
-    fprintf(stderr,"Required option -i|--input-bam not defined.\n");
-    print_usage(1);
-  }
+  check(input_file!=NULL, "Required option -i|--input-bam not defined.\n");
 
-  if(is_base && region_store==NULL){
-    fprintf(stderr,"Option -r|--region must be used with the -b|--base option.\n");
-    print_usage(1);
-  }
+  if(is_base){
+		 check(region_store!=NULL, "Option -r|--region must be used with the -b|--base option.\n");
+	 }
 
-  return;
+	return 0;
+error:
+	print_usage(1);
+  return -1;
 }
 
 // callback for bam_plbuf_init()
@@ -301,7 +297,8 @@ uint32_t getContigLength(char *contig,chromList_t *chromList){
 }
 
 int main(int argc, char *argv[]){
-	setup_options(argc, argv);
+	int check_opt = setup_options(argc, argv);
+	check(check_opt==0,"Error parsing options.");
 	tmpstruct_t tmp;
 	int no_of_regions = 0;
 
@@ -350,8 +347,7 @@ int main(int argc, char *argv[]){
 			char *contig = malloc(sizeof(char)*1024);
 			check_mem(contig);
 			int beg,end;
-			int chk = sscanf(region_store,"%[^:]:%d-%d",contig,&beg,&end);
-			check(chk==3,"Error reading line '%s' from regions bed file.",region_store);
+			check(sscanf(region_store,"%[^:]:%d-%d",contig,&beg,&end)==3,"Error reading line '%s' from regions bed file.",region_store);
 
 			//Attempt to add contig as key to hash
 			int absent;
@@ -435,7 +431,7 @@ int main(int argc, char *argv[]){
 	}
   int i=0;
 	for(i=0;i<no_of_regions;i++){
-	  chck = process_bam_region(input_file, func_reg, &tmp, filter,  our_region_list[i], reference);
+	  chck = process_bam_region(input_file, func_reg, &tmp, filter,  our_region_list[i], nthreads, reference);
 	  check(chck==1,"Error parsing bam region.");
 	  start =  tmp.lstart;
     stop = tmp.lpos+1;

@@ -240,11 +240,12 @@ error:
   return -1;
 }
 
-int process_bam_file(char *input_file, bw_func pileup_func, tmpstruct_t *tmp, int filter, char *reference){
+int process_bam_file(char *input_file, bw_func pileup_func, tmpstruct_t *tmp, int filter, int nthreads, char *reference){
 
   bam_plp_t buf = NULL;
 	bam1_t *b = NULL;
   hts_itr_t *iter = NULL;
+  htsThreadPool p = {NULL, 0};
   tmp->beg = 0; tmp->end = 0x7fffffff;
 	tmp->lstart    = 0;
 	tmp->lcoverage = 0;
@@ -258,6 +259,15 @@ int process_bam_file(char *input_file, bw_func pileup_func, tmpstruct_t *tmp, in
     check(check==0,"Error setting reference %s for hts file %s.",reference,input_file);
   }
   tmp->head = sam_hdr_read(tmp->in);
+  check(tmp->head!=NULL,"Error getting header from file %s.",input_file);
+
+  // Create and share the thread pool
+	if (nthreads > 0) {
+			p.pool = hts_tpool_init(nthreads);
+			check(p.pool != NULL, "Error creating thread pool");
+			hts_set_opt(input,  HTS_OPT_THREAD_POOL, &p);
+	}
+
   buf = bam_plp_init(0,0);
   //Iterate through each read in bam file.
   b = bam_init1();
@@ -285,6 +295,7 @@ int process_bam_file(char *input_file, bw_func pileup_func, tmpstruct_t *tmp, in
   bam_destroy1(b);
 
   if(iter) sam_itr_destroy(iter);
+  if (p.pool) hts_tpool_destroy(p.pool);
   return 1;
 
 error:
@@ -293,16 +304,18 @@ error:
 	if(tmp->in) hts_close(tmp->in);
   if(tmp->head) bam_hdr_destroy(tmp->head);
   if(tmp->in) hts_close(tmp->in);
+  if (p.pool) hts_tpool_destroy(p.pool);
   return -1;
 }
 
-int process_bam_region_bases(char *input_file, bw_func_reg perbase_pileup_func, tmpstruct_t *perbase, int filter, char *region, char *reference){
+int process_bam_region_bases(char *input_file, bw_func_reg perbase_pileup_func, tmpstruct_t *perbase, int filter, char *region, int nthreads, char *reference){
   bam_plp_t buf = NULL;
 	bam1_t *b = NULL;
   hts_itr_t *iter = NULL;
   htsFile *file = NULL;
   hts_idx_t *idx = NULL;
 	bam_hdr_t *head = NULL;
+  htsThreadPool p = {NULL, 0};
   file= hts_open(input_file, "r");
   check(file!=0,"Fail to open [CR|B]AM file %s\n", input_file);
   if(reference){
@@ -310,6 +323,15 @@ int process_bam_region_bases(char *input_file, bw_func_reg perbase_pileup_func, 
     check(check==0,"Error setting reference %s for hts file %s.",reference,input_file);
   }
   head = sam_hdr_read(file);
+  check(head!=NULL,"Error getting header from file %s.",input_file);
+
+  // Create and share the thread pool
+  if (nthreads > 0) {
+      p.pool = hts_tpool_init(nthreads);
+      check(p.pool != NULL, "Error creating thread pool");
+      hts_set_opt(input,  HTS_OPT_THREAD_POOL, &p);
+  }
+
   buf = bam_plp_init(0,0);
   //Iterate through each read in bam file.
   b = bam_init1();
@@ -381,20 +403,23 @@ int process_bam_region_bases(char *input_file, bw_func_reg perbase_pileup_func, 
   if(iter) sam_itr_destroy(iter);
   if(idx) hts_idx_destroy(idx);
 	if(file) hts_close(file);
+  if (p.pool) hts_tpool_destroy(p.pool);
   return 1;
 error:
   if(iter) sam_itr_destroy(iter);
   if(idx) hts_idx_destroy(idx);
 	if(file) hts_close(file);
+  if (p.pool) hts_tpool_destroy(p.pool);
 	if(head) bam_hdr_destroy(head);
   return -1;
 }
 
-int process_bam_region(char *input_file, bw_func_reg pileup_func, tmpstruct_t *tmp, int filter, char *region, char *reference){
+int process_bam_region(char *input_file, bw_func_reg pileup_func, tmpstruct_t *tmp, int filter, char *region, int nthreads, char *reference){
 
   bam_plp_t buf = NULL;
 	bam1_t *b = NULL;
   hts_itr_t *iter = NULL;
+  htsThreadPool p = {NULL, 0};
   tmp->beg = 0; tmp->end = 0x7fffffff;
 	tmp->lstart    = 0;
 	tmp->lcoverage = 0;
@@ -408,6 +433,16 @@ int process_bam_region(char *input_file, bw_func_reg pileup_func, tmpstruct_t *t
     check(check==0,"Error setting reference %s for hts file %s.",reference,input_file);
   }
   tmp->head = sam_hdr_read(tmp->in);
+
+  check(tmp->head!=NULL,"Error getting header from file %s.",input_file);
+
+  // Create and share the thread pool
+  if (nthreads > 0) {
+      p.pool = hts_tpool_init(nthreads);
+      check(p.pool != NULL, "Error creating thread pool");
+      hts_set_opt(input,  HTS_OPT_THREAD_POOL, &p);
+  }
+
   buf = bam_plp_init(0,0);
   //Iterate through each read in bam file.
   b = bam_init1();
@@ -465,11 +500,13 @@ int process_bam_region(char *input_file, bw_func_reg pileup_func, tmpstruct_t *t
   if(iter) sam_itr_destroy(iter);
   if(tmp->idx) hts_idx_destroy(tmp->idx);
 	if(tmp->in) hts_close(tmp->in);
+  if (p.pool) hts_tpool_destroy(p.pool);
   return 1;
 error:
   if(iter) sam_itr_destroy(iter);
   if(tmp->idx) hts_idx_destroy(tmp->idx);
 	if(tmp->in) hts_close(tmp->in);
+  if (p.pool) hts_tpool_destroy(p.pool);
   if(tmp->head) bam_hdr_destroy(tmp->head);
   return -1;
 }
