@@ -265,7 +265,7 @@ int process_bam_file(char *input_file, bw_func pileup_func, tmpstruct_t *tmp, in
 	if (nthreads > 0) {
 			p.pool = hts_tpool_init(nthreads);
 			check(p.pool != NULL, "Error creating thread pool");
-			hts_set_opt(input,  HTS_OPT_THREAD_POOL, &p);
+			hts_set_opt(tmp->in,  HTS_OPT_THREAD_POOL, &p);
 	}
 
   buf = bam_plp_init(0,0);
@@ -329,7 +329,7 @@ int process_bam_region_bases(char *input_file, bw_func_reg perbase_pileup_func, 
   if (nthreads > 0) {
       p.pool = hts_tpool_init(nthreads);
       check(p.pool != NULL, "Error creating thread pool");
-      hts_set_opt(input,  HTS_OPT_THREAD_POOL, &p);
+      hts_set_opt(file,  HTS_OPT_THREAD_POOL, &p);
   }
 
   buf = bam_plp_init(0,0);
@@ -440,7 +440,7 @@ int process_bam_region(char *input_file, bw_func_reg pileup_func, tmpstruct_t *t
   if (nthreads > 0) {
       p.pool = hts_tpool_init(nthreads);
       check(p.pool != NULL, "Error creating thread pool");
-      hts_set_opt(input,  HTS_OPT_THREAD_POOL, &p);
+      hts_set_opt(tmp->in,  HTS_OPT_THREAD_POOL, &p);
   }
 
   buf = bam_plp_init(0,0);
