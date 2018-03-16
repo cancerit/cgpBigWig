@@ -92,7 +92,7 @@ int get_int_length(int input){
   return (input == 0 ? 1 : (int)(log10(input)+1));
 }
 
-void setup_options(int argc, char *argv[]){
+int setup_options(int argc, char *argv[]){
 	const struct option long_opts[] =
 	{
              	{"input", required_argument, 0, 'i'},
