@@ -34,6 +34,7 @@
 #include <getopt.h>
 #include <stdlib.h>
 #include <string.h>
+#include "htslib/thread_pool.h"
 #include "bam_access.h"
 #include "utils.h"
 
@@ -41,6 +42,7 @@ static char *input_file = NULL;
 static char *output_file = NULL;
 static char *region = NULL;
 static int filter = 0;
+int nthreads = 0; // shared pool
 uint8_t is_overlap = 0;
 
 KHASH_MAP_INIT_STR(strh,uint8_t)
@@ -49,19 +51,20 @@ void print_usage (int exit_code){
 
 	printf ("Usage: bam2bedgraph -i input.[cr|b]am -o file [-r region] [-h] [-v]\n\n");
 	printf ("Create a BEDGraph file of genomic coverage. BAM file must be sorted.\n");
-  printf ("-i --input     Path to bam/cram input file. [default: stdin]\n");
-  printf ("-o --output    File path for output. [default: stdout]\n\n");
+  printf ("-i --input               Path to bam/cram input file. [default: stdin]\n");
+  printf ("-o --output              File path for output. [default: stdout]\n\n");
 	printf ("Optional:\n");
-	printf ("-r --region    Region in bam to access.\n");
-	printf ("-f --filter    Ignore reads with the filter flags [int].\n");
-	printf ("-a --overlap   Use overlapping read check.\n\n");
+	printf ("-r --region              Region in bam to access.\n");
+	printf ("-f --filter [int]        Ignore reads with the filter flags.\n");
+	printf ("-@  --num_threads [int]  Use thread pool with specified number of threads.\n");
+	printf ("-a --overlap             Use overlapping read check.\n\n");
 	printf ("Other:\n");
-	printf ("-h --help      Display this usage information.\n");
-	printf ("-v --version   Prints the version number.\n\n");
+	printf ("-h --help                Display this usage information.\n");
+	printf ("-v --version             Prints the version number.\n\n");
   exit(exit_code);
 }
 
-void options(int argc, char *argv[]){
+int options(int argc, char *argv[]){
 	const struct option long_opts[] =
 	  {
              	{"version", no_argument, 0, 'v'},
@@ -71,6 +74,7 @@ void options(int argc, char *argv[]){
               {"filter",required_argument,0,'f'},
               {"output",required_argument,0,'o'},
 							{"overlap", no_argument, 0, 'a'},
+							{"num_threads",required_argument,0,'@'},
               {"rna",no_argument,0, 'a'},
               { NULL, 0, NULL, 0}
 
@@ -80,7 +84,7 @@ void options(int argc, char *argv[]){
    int iarg = 0;
 
    //Iterate through options
-   while((iarg = getopt_long(argc, argv, "i:o:r:f:avh", long_opts, &index)) != -1){
+   while((iarg = getopt_long(argc, argv, "i:o:r:f:@:avh", long_opts, &index)) != -1){
    	switch(iarg){
    		case 'i':
         input_file = optarg;
@@ -95,10 +99,7 @@ void options(int argc, char *argv[]){
    		  break;
 
    		case 'f':
-   		  if(sscanf(optarg, "%i", &filter) != 1){
-      		printf("Error parsing -f argument '%s'. Should be an integer > 0",optarg);
-      		print_usage(1);
-      	}
+   		  check(sscanf(optarg, "%i", &filter) == 1, "Error parsing -f argument '%s'. Should be an integer > 0",optarg);
       	break;
 
 			case 'a':
@@ -129,16 +130,16 @@ void options(int argc, char *argv[]){
     input_file = "-";   // htslib recognises this as a special case
    }
    if (strcmp(input_file,"-") != 0) {
-     if(check_exist(input_file) != 1){
-   	  printf("Input file (-i) %s does not exist.\n",input_file);
-   	  print_usage(1);
-     }
+     check(check_exist(input_file) == 1, "Input file (-i) %s does not exist.\n",input_file);
    }
    if (output_file==NULL || strcmp(output_file,"/dev/stdout")==0) {
     output_file = "-";   // we recognise this as a special case
    }
 
-   return;
+	 return 0;
+error:
+	 print_usage(1);
+	 return -1;
 }
 
 // callback for bam_plbuf_init()
@@ -203,7 +204,8 @@ static int pileup_func_overlap(uint32_t tid, uint32_t position, int n, const bam
 }
 
 int main(int argc, char *argv[]){
-	options(argc, argv);
+	int chk_opt = options(argc, argv);
+	check(chk_opt==0,"Error parsing options.");
   tmpstruct_t tmp;
   FILE *out = NULL;
 	if (strcmp(output_file,"-")==0) {
@@ -221,10 +223,10 @@ int main(int argc, char *argv[]){
 		func_reg = &pileup_func_overlap;
 	}
 	if(region == NULL){
-	  check = process_bam_file(input_file, func, &tmp, filter, NULL);
+	  check = process_bam_file(input_file, func, &tmp, filter, nthreads,NULL);
 	  check(check==1,"Error parsing bam file.");
 	}else{
-		check = process_bam_region(input_file, func_reg, &tmp, filter, region, NULL);
+		check = process_bam_region(input_file, func_reg, &tmp, filter, region, nthreads, NULL);
     check(check==1,"Error parsing bam region.");
 	}
   fprintf(out,"%s\t%d\t%d\t%d\n", tmp.head->target_name[tmp.ltid], tmp.lstart,tmp.lpos+1, tmp.lcoverage);
