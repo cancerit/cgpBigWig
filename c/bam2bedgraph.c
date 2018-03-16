@@ -64,7 +64,7 @@ void print_usage (int exit_code){
   exit(exit_code);
 }
 
-void options(int argc, char *argv[]){
+int options(int argc, char *argv[]){
 	const struct option long_opts[] =
 	  {
              	{"version", no_argument, 0, 'v'},
