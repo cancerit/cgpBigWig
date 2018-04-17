@@ -1,5 +1,9 @@
 # CHANGES
 
+## 1.0.1
+
+* Fix bam2bw. Single region string and -z caused header issues.
+
 ## 1.0.0
 
 - First full release
