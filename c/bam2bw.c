@@ -312,6 +312,34 @@ int main(int argc, char *argv[]){
 
 	int sq_lines = get_no_of_SQ_lines(input_file);
 	FILE *fp_bed = NULL;
+
+	//Build list of contigs for chrom list from the header of the bamfile
+	htsFile *bam =  NULL;
+	char *line_hd = NULL;
+	bam = hts_open(input_file, "r");
+	check(bam != 0,"Bam file %s failed to open to read header.",input_file);
+	bam_hdr_t *header = sam_hdr_read(bam);
+	char *head_txt = header->text;
+	line_hd = strtok(head_txt,"\n");
+	while(line_hd != NULL){
+		//Check for a sequence line
+		if(strncmp(line_hd,"@SQ",3)==0){
+			char *contig = malloc(sizeof(char) * 1024);
+			int end,chk;
+			chk = parse_SQ_line(line_hd,contig,&end);
+			check(chk==1,"Error parsing SQ line %s.\n",line_hd);
+			//Attempt to add contig as key to hash
+			int absent;
+			fprintf(stderr,"contig %s\n",contig);
+			k = kh_put(str, contigs_h, contig, &absent);
+			if (absent) kh_key(contigs_h, k) = strdup(contig);
+		}//End of if this is an SQ line
+		line_hd = strtok(NULL,"\n");
+	}
+	bam_hdr_destroy(header);
+	free(line_hd);
+	hts_close(bam);
+
 	if(region_store){
     if(is_regions_file==1){
       //If we have a bedfile or regions
@@ -328,12 +356,6 @@ int main(int argc, char *argv[]){
           int beg,end;
           int chk = sscanf(line,"%s\t%d\t%d",contig,&beg,&end);
           check(chk==3,"Error reading line '%s' from regions bed file.",line);
-
-					//Attempt to add contig as key to hash
-					int absent;
-        	k = kh_put(str, contigs_h, contig, &absent);
-        	if (absent) kh_key(contigs_h, k) = strdup(contig);
-
           char *region = malloc(sizeof(char) * (strlen(contig)+get_int_length(beg)+get_int_length(end))+3);
           check_mem(region);
           chk = sprintf(region,"%s:%d-%d",contig,beg+1,end); //+1 to beginning as this is bed
@@ -352,12 +374,6 @@ int main(int argc, char *argv[]){
 			int beg,end;
 			int chk = sscanf(region_store,"%[^:]:%d-%d",contig,&beg,&end);
 			check(chk==3,"Error reading line '%s' from regions bed file.",region_store);
-
-			//Attempt to add contig as key to hash
-			int absent;
-			k = kh_put(str, contigs_h, contig, &absent);
-			if (absent) kh_key(contigs_h, k) = strdup(contig);
-
 			free(contig);
 
       our_region_list[0] = region_store;
@@ -367,7 +383,7 @@ int main(int argc, char *argv[]){
     //Build a list of regions from the header of the bamfile
     no_of_regions = sq_lines;
     our_region_list = calloc(no_of_regions, sizeof(char *));
-    htsFile *bam =  NULL;
+		bam =  NULL;
     char *line = NULL;
     bam = hts_open(input_file, "r");
     check(bam != 0,"Bam file %s failed to open to read header.",input_file);
@@ -376,9 +392,9 @@ int main(int argc, char *argv[]){
     line = strtok(head_txt,"\n");
     int i=0;
     while(line != NULL){
-      //Check for a read group line
+      //Check for a sequence line
       if(strncmp(line,"@SQ",3)==0){
-        char *contig = malloc(sizeof(char) * 256);
+        char *contig = malloc(sizeof(char) * 1024);
         int end,chk;
         chk = parse_SQ_line(line,contig,&end);
         check(chk==1,"Error parsing SQ line %s.\n",line);
@@ -386,10 +402,6 @@ int main(int argc, char *argv[]){
         check_mem(region);
         chk = sprintf(region,"%s:%d-%d",contig,1,end);
         check(chk==((strlen(contig)+get_int_length(end))+3),"Error creating region line from bed entry '%s'.",line);
-				//Attempt to add contig as key to hash
-				int absent;
-				k = kh_put(str, contigs_h, contig, &absent);
-				if (absent) kh_key(contigs_h, k) = strdup(contig);
         our_region_list[i] = region;
         i++;
       }//End of if this is an SQ line
