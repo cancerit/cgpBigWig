@@ -1,5 +1,9 @@
 # CHANGES
 
+## 1.0.2
+
+* Correct region parsing in bam2bw to cope woth GRCh38 contigs
+
 ## 1.0.1
 
 * Fix bam2bw. Single region string and -z caused header issues.
