@@ -330,7 +330,6 @@ int main(int argc, char *argv[]){
 			check(chk==1,"Error parsing SQ line %s.\n",line_hd);
 			//Attempt to add contig as key to hash
 			int absent;
-			fprintf(stderr,"contig %s\n",contig);
 			k = kh_put(str, contigs_h, contig, &absent);
 			if (absent) kh_key(contigs_h, k) = strdup(contig);
 		}//End of if this is an SQ line
@@ -372,8 +371,21 @@ int main(int argc, char *argv[]){
 			char *contig = malloc(sizeof(char)*1024);
 			check_mem(contig);
 			int beg,end;
-			int chk = sscanf(region_store,"%[^:]:%d-%d",contig,&beg,&end);
-			check(chk==3,"Error reading line '%s' from regions bed file.",region_store);
+
+			const char *q;
+			q = hts_parse_reg(region_store,&beg,&end);
+
+			if (q) {
+        char tmp_a[1024], *contig = tmp_a;
+        if (q - region_store + 1 > 1024)
+            if (!(contig = malloc(q - region_store + 1)))
+                sentinel("Error allocating memory for region parsing.");
+        strncpy(contig, region_store, q - region_store);
+        contig[q - region_store] = 0;
+			}else{
+				// not parsable as a region, but possibly a sequence named "foo:a"
+        beg = 0; end = INT_MAX;
+			}
 			free(contig);
 
       our_region_list[0] = region_store;
