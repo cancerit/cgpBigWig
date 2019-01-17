@@ -268,6 +268,12 @@ int process_bam_file(char *input_file, bw_func pileup_func, tmpstruct_t *tmp, in
   int chck;
   while((reto = sam_read1(tmp->in, tmp->head, b)) >= 0){
     if((b->core.flag & filter)>0) continue; //Skip if this is a filtered read
+    //If the filter includes a check for proper pair
+    //Assume that we have paried end data and check the orientations
+    if((BAM_FPROPER_PAIR & filter)>0){
+        if(((b->core.flag & BAM_FMREVERSE) && (b->core.flag & BAM_FREVERSE))) continue;
+        if ((!(b->core.flag & BAM_FMREVERSE) && !(b->core.flag & BAM_FREVERSE))) continue;
+    }
     int ret;
     ret = bam_plp_push(buf, b);
     if (ret < 0) break;
@@ -337,6 +343,12 @@ int process_bam_region_bases(char *input_file, bw_func_reg perbase_pileup_func, 
   int ret, n_plp, tid, pos, chck;
   while ((result = sam_itr_next(file, iter, b)) >= 0) {
     if((b->core.flag & filter)>0) continue; //Skip if this is a filtered read
+    //If the filter includes a check for proper pair
+    //Assume that we have paried end data and check the orientations
+    if((BAM_FPROPER_PAIR & filter)>0){
+        if(((b->core.flag & BAM_FMREVERSE) && (b->core.flag & BAM_FREVERSE))) continue;
+        if ((!(b->core.flag & BAM_FMREVERSE) && !(b->core.flag & BAM_FREVERSE))) continue;
+    }
     ret = bam_plp_push(buf, b);
     if (ret < 0) break;
     while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != 0){
@@ -429,6 +441,12 @@ int process_bam_region(char *input_file, bw_func_reg pileup_func, tmpstruct_t *t
   int ret, n_plp, tid, pos, chck;
   while ((result = sam_itr_next(tmp->in, iter, b)) >= 0) {
     if((b->core.flag & filter)>0) continue; //Skip if this is a filtered read
+    //If the filter includes a check for proper pair
+    //Assume that we have paried end data and check the orientations
+    if((BAM_FPROPER_PAIR & filter)>0){
+        if(((b->core.flag & BAM_FMREVERSE) && (b->core.flag & BAM_FREVERSE))) continue;
+        if ((!(b->core.flag & BAM_FMREVERSE) && !(b->core.flag & BAM_FREVERSE))) continue;
+    }
     ret = bam_plp_push(buf, b);
     if (ret < 0) break;
     while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != NULL){
