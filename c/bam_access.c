@@ -240,7 +240,7 @@ error:
   return -1;
 }
 
-int process_bam_file(char *input_file, bw_func pileup_func, tmpstruct_t *tmp, int filter, char *reference){
+int process_bam_file(char *input_file, bw_func pileup_func, tmpstruct_t *tmp, int filter, int filter_inc, char *reference){
 
   bam_plp_t buf = NULL;
 	bam1_t *b = NULL;
@@ -270,7 +270,7 @@ int process_bam_file(char *input_file, bw_func pileup_func, tmpstruct_t *tmp, in
     if((b->core.flag & filter)>0) continue; //Skip if this is a filtered read
     //If the filter is not removing proper pairs
     //Assume that we have paried end data and check the orientations
-    if((BAM_FPROPER_PAIR & filter) != 0){
+    if((BAM_FPROPER_PAIR & filterinc) > 0){
         if(((b->core.flag & BAM_FMREVERSE) && (b->core.flag & BAM_FREVERSE))) continue;
         if ((!(b->core.flag & BAM_FMREVERSE) && !(b->core.flag & BAM_FREVERSE))) continue;
     }
@@ -302,7 +302,8 @@ error:
   return -1;
 }
 
-int process_bam_region_bases(char *input_file, bw_func_reg perbase_pileup_func, tmpstruct_t *perbase, int filter, char *region, char *reference){
+int process_bam_region_bases(char *input_file, bw_func_reg perbase_pileup_func, tmpstruct_t *perbase, int filter, 
+                                                                        int filter_inc, char *region, char *reference){
   bam_plp_t buf = NULL;
 	bam1_t *b = NULL;
   hts_itr_t *iter = NULL;
@@ -345,7 +346,7 @@ int process_bam_region_bases(char *input_file, bw_func_reg perbase_pileup_func, 
     if((b->core.flag & filter)>0) continue; //Skip if this is a filtered read
     //If the filter is not removing proper pairs
     //Assume that we have paried end data and check the orientations
-    if((BAM_FPROPER_PAIR & filter) != 0){
+    if((BAM_FPROPER_PAIR & filter) > 0){
         if(((b->core.flag & BAM_FMREVERSE) && (b->core.flag & BAM_FREVERSE))) continue;
         if ((!(b->core.flag & BAM_FMREVERSE) && !(b->core.flag & BAM_FREVERSE))) continue;
     }
@@ -402,7 +403,8 @@ error:
   return -1;
 }
 
-int process_bam_region(char *input_file, bw_func_reg pileup_func, tmpstruct_t *tmp, int filter, char *region, char *reference){
+int process_bam_region(char *input_file, bw_func_reg pileup_func, tmpstruct_t *tmp, int filter, int filter_inc, 
+                                                                                        char *region, char *reference){
 
   bam_plp_t buf = NULL;
 	bam1_t *b = NULL;
@@ -443,7 +445,7 @@ int process_bam_region(char *input_file, bw_func_reg pileup_func, tmpstruct_t *t
     if((b->core.flag & filter)>0) continue; //Skip if this is a filtered read
     //If the filter is not removing proper pairs
     //Assume that we have paried end data and check the orientations
-    if((BAM_FPROPER_PAIR & filter) != BAM_FPROPER_PAIR){
+    if((BAM_FPROPER_PAIR & filter) > 0){
         if(((b->core.flag & BAM_FMREVERSE) && (b->core.flag & BAM_FREVERSE))) continue;
         if ((!(b->core.flag & BAM_FMREVERSE) && !(b->core.flag & BAM_FREVERSE))) continue;
     }
