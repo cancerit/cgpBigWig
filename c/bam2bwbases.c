@@ -60,6 +60,8 @@ void print_usage (int exit_code){
 	printf("bam2bwbases can be used to generate four bw files of per base proportions.\n\n");
 	printf("-i  --input [file]                                Path to the input [b|cr]am file.\n");
 	printf("-F  --filter [int]                                SAM flags to filter. [default: %d]\n",filter);
+  printf("                                                  N.B. if properly paired reads are not filtered out, bam2bwbases will assume paired-end data\n");
+  printf("                                                  and filter any proper-pair flagged reads not in F/R orientation.");
 	printf("-o  --outfile [file]                              Path to the output .bw file produced. Per base results wiillbe output as four bw files [ACGT].outputname.bw [default:'%s']\n\n",out_file);
 	printf("Optional: \n");
 	printf("-c  --region [file]                               A samtools style region (contig:start-stop) or a bed file of regions over which to produce the bigwig file\n");

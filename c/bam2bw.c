@@ -62,6 +62,8 @@ void print_usage (int exit_code){
 	printf("bam2bw can be used to generate a bw file of coverage from a [cr|b]am file.\n\n");
 	printf("-i  --input [file]                                Path to the input [b|cr]am file.\n");
 	printf("-F  --filter [int]                                SAM flags to filter. [default: %d]\n",filter);
+  printf("                                                  N.B. if properly paired reads are not filtered out, bam2bw will assume paired-end data\n");
+  printf("                                                  and filter any proper-pair flagged reads not in F/R orientation.");
 	printf("-o  --outfile [file]                              Path to the output .bw file produced. [default:'%s']\n\n",out_file);
 	printf("Optional: \n");
 	printf("-c  --region [file]                               A samtools style region (contig:start-stop) or a bed file of regions over which to produce the bigwig file\n");

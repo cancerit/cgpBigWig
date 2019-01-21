@@ -54,6 +54,8 @@ void print_usage (int exit_code){
 	printf ("Optional:\n");
 	printf ("-r --region    Region in bam to access.\n");
 	printf ("-f --filter    Ignore reads with the filter flags [int].\n");
+  printf("                N.B. if properly paired reads are not filtered out, bam2bedgraph will assume paired-end\n");
+  printf("                and filter any proper-pair flagged reads not in F/R orientation.");
 	printf ("-a --overlap   Use overlapping read check.\n\n");
 	printf ("Other:\n");
 	printf ("-h --help      Display this usage information.\n");
