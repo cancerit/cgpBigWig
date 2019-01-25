@@ -51,6 +51,7 @@ uint32_t region_list_count = 0;
 int is_regions_file = 0;
 uint8_t is_base = 0;
 int filter = 4;
+int filterinc = 0;
 char base = 0;
 uint8_t is_overlap = 0;
 int include_zeroes = 0;
@@ -62,6 +63,9 @@ void print_usage (int exit_code){
 	printf("bam2bw can be used to generate a bw file of coverage from a [cr|b]am file.\n\n");
 	printf("-i  --input [file]                                Path to the input [b|cr]am file.\n");
 	printf("-F  --filter [int]                                SAM flags to filter. [default: %d]\n",filter);
+  printf("-f  --filter-include [int]                        SAM flags to include. [default: %d]\n",filterinc);
+  printf("                                                  N.B. if properly paired reads are filtered for inclusion bam2bw will assume paired-end data\n");
+  printf("                                                  and exclude any proper-pair flagged reads not in F/R orientation.");
 	printf("-o  --outfile [file]                              Path to the output .bw file produced. [default:'%s']\n\n",out_file);
 	printf("Optional: \n");
 	printf("-c  --region [file]                               A samtools style region (contig:start-stop) or a bed file of regions over which to produce the bigwig file\n");
@@ -98,6 +102,7 @@ void setup_options(int argc, char *argv[]){
 	{
              	{"input", required_argument, 0, 'i'},
              	{"filter", required_argument, 0, 'F'},
+              {"filter-include", required_argument, 0, 'f'}, 
              	{"outfile",required_argument, 0, 'o'},
              	{"region",required_argument, 0, 'c'},
              	{"reference",required_argument, 0, 'r'},
@@ -113,11 +118,17 @@ void setup_options(int argc, char *argv[]){
    int iarg = 0;
 
    //Iterate through options
-   while((iarg = getopt_long(argc, argv, "F:i:o:c:r:azhv",long_opts, &index)) != -1){
+   while((iarg = getopt_long(argc, argv, "F:f:i:o:c:r:azhv",long_opts, &index)) != -1){
     switch(iarg){
       case 'F':
         if(sscanf(optarg, "%i", &filter) != 1){
       		fprintf(stderr,"Error parsing -F|--filter argument '%s'. Should be an integer > 0",optarg);
+      		print_usage(1);
+      	}
+        break;
+      case 'f':
+        if(sscanf(optarg, "%i", &filterinc) != 1){
+      		fprintf(stderr,"Error parsing -f|--filter-include argument '%s'. Should be an integer > 0",optarg);
       		print_usage(1);
       	}
         break;
@@ -459,7 +470,7 @@ int main(int argc, char *argv[]){
 	}
   int i=0;
 	for(i=0;i<no_of_regions;i++){
-	  chck = process_bam_region(input_file, func_reg, &tmp, filter,  our_region_list[i], reference);
+	  chck = process_bam_region(input_file, func_reg, &tmp, filter, filterinc, our_region_list[i], reference);
 	  check(chck==1,"Error parsing bam region.");
 	  start =  tmp.lstart;
     stop = tmp.lpos+1;
