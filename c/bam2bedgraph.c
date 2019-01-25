@@ -41,6 +41,7 @@ static char *input_file = NULL;
 static char *output_file = NULL;
 static char *region = NULL;
 static int filter = 0;
+int filterinc = 0;
 uint8_t is_overlap = 0;
 
 KHASH_MAP_INIT_STR(strh,uint8_t)
@@ -49,15 +50,18 @@ void print_usage (int exit_code){
 
 	printf ("Usage: bam2bedgraph -i input.[cr|b]am -o file [-r region] [-h] [-v]\n\n");
 	printf ("Create a BEDGraph file of genomic coverage. BAM file must be sorted.\n");
-  printf ("-i --input     Path to bam/cram input file. [default: stdin]\n");
-  printf ("-o --output    File path for output. [default: stdout]\n\n");
+  printf ("-i --input                     Path to bam/cram input file. [default: stdin]\n");
+  printf ("-o --output                    File path for output. [default: stdout]\n\n");
 	printf ("Optional:\n");
-	printf ("-r --region    Region in bam to access.\n");
-	printf ("-f --filter    Ignore reads with the filter flags [int].\n");
-	printf ("-a --overlap   Use overlapping read check.\n\n");
+	printf ("-r --region                    Region in bam to access.\n");
+	printf ("-F --filter                    Ignore reads with the filter flags [int].\n");
+  printf ("-f --filter-include [int]      SAM flags to include. [default: %d]\n",filterinc);
+  printf ("                               N.B. if properly paired reads are filtered for inclusion bam2bw will assume paired-end data\n");
+  printf ("                               and exclude any proper-pair flagged reads not in F/R orientation.");
+	printf ("-a --overlap                   Use overlapping read check.\n\n");
 	printf ("Other:\n");
-	printf ("-h --help      Display this usage information.\n");
-	printf ("-v --version   Prints the version number.\n\n");
+	printf ("-h --help                      Display this usage information.\n");
+	printf ("-v --version                   Prints the version number.\n\n");
   exit(exit_code);
 }
 
@@ -68,7 +72,8 @@ void options(int argc, char *argv[]){
              	{"help",no_argument,0,'h'},
               {"input",required_argument,0,'i'},
               {"region",required_argument,0,'r'},
-              {"filter",required_argument,0,'f'},
+              {"filter",required_argument,0,'F'},
+              {"filter-include",required_argument,0,'f'},
               {"output",required_argument,0,'o'},
 							{"overlap", no_argument, 0, 'a'},
               {"rna",no_argument,0, 'a'},
@@ -80,7 +85,7 @@ void options(int argc, char *argv[]){
    int iarg = 0;
 
    //Iterate through options
-   while((iarg = getopt_long(argc, argv, "i:o:r:f:avh", long_opts, &index)) != -1){
+   while((iarg = getopt_long(argc, argv, "i:o:r:f:F:avh", long_opts, &index)) != -1){
    	switch(iarg){
    		case 'i':
         input_file = optarg;
@@ -94,13 +99,18 @@ void options(int argc, char *argv[]){
    		  region = optarg;
    		  break;
 
-   		case 'f':
+   		case 'F':
    		  if(sscanf(optarg, "%i", &filter) != 1){
-      		printf("Error parsing -f argument '%s'. Should be an integer > 0",optarg);
+      		printf("Error parsing -F argument '%s'. Should be an integer > 0",optarg);
       		print_usage(1);
       	}
       	break;
-
+      case 'f':
+        if(sscanf(optarg, "%i", &filterinc) != 1){
+      		fprintf(stderr,"Error parsing -f|--filter-include argument '%s'. Should be an integer > 0",optarg);
+      		print_usage(1);
+      	}
+        break;
 			case 'a':
 				is_overlap = 1;
 				break;
@@ -221,10 +231,10 @@ int main(int argc, char *argv[]){
 		func_reg = &pileup_func_overlap;
 	}
 	if(region == NULL){
-	  check = process_bam_file(input_file, func, &tmp, filter, NULL);
+	  check = process_bam_file(input_file, func, &tmp, filter, filterinc, NULL);
 	  check(check==1,"Error parsing bam file.");
 	}else{
-		check = process_bam_region(input_file, func_reg, &tmp, filter, region, NULL);
+		check = process_bam_region(input_file, func_reg, &tmp, filter, filterinc, region, NULL);
     check(check==1,"Error parsing bam region.");
 	}
   fprintf(out,"%s\t%d\t%d\t%d\n", tmp.head->target_name[tmp.ltid], tmp.lstart,tmp.lpos+1, tmp.lcoverage);

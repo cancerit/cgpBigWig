@@ -1,5 +1,17 @@
 # CHANGES
 
+## 1.0.3
+
+### Behaviour change
+
+**When the proper pair filter flag is used, this code now checks that the paired-end orientation is also used.**
+**This will mean that mate-pair orientation (F/F or R/R) will be rejected**
+
+* Where a proper pair filter is used, now check for the correct paired-end orientation of F/R.
+* If this is not met the read is ignored
+* Added a -f filter of flags to **include** alongside the existing -F for exclude as per samtools style filtering for `bam2bw`, `bam2bwbases` and `bam2bedgraph`
+* **NB this flag was used as the exclude in `bam2bedgraph`. The flags have now been switched.** 
+
 ## 1.0.2
 
 * Correct region parsing in bam2bw to cope woth GRCh38 contigs
@@ -10,18 +22,18 @@
 
 ## 1.0.0
 
-- First full release
-- Add overlapping reads support to `bam2bw`, `bam2bwbases` and `bam2bedgraph` via commandline flag `--overlap` `-a`
-  - If the same readname is encountered twice at a position it is considred an overlapping read pair.
-  - Where the same base [ACGT] was encountered on each of the reads it will only be counted once. If a different base was encountered then the coverage count is incremented once for each base.
-- Updated License headers with new email address
+* First full release
+* Add overlapping reads support to `bam2bw`, `bam2bwbases` and `bam2bedgraph` via commandline flag `--overlap` `-a`
+  * If the same readname is encountered twice at a position it is considred an overlapping read pair.
+  * Where the same base [ACGT] was encountered on each of the reads it will only be counted once. If a different base was encountered then the coverage count is incremented once for each base.
+* Updated License headers with new email address
 
 ## 0.5.0
 
--   Update to HTSlib 1.5 (for consistency across tools)
--   Update to libBigWig 0.4.2
--   Some README.md and INSTALL.md updates
-    -   Thanks go to [jsmedmar](https://github.com/jsmedmar) for documentation contributions
+* Update to HTSlib 1.5 (for consistency across tools)
+* Update to libBigWig 0.4.2
+* Some README.md and INSTALL.md updates
+  * Thanks go to [jsmedmar](https://github.com/jsmedmar) for documentation contributions
 
 ## 0.4.4
 
