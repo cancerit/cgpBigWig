@@ -370,6 +370,9 @@ int process_bam_region_bases(char *input_file, bw_func_reg perbase_pileup_func, 
       if(pos==stop) break;
     }
   }
+
+  check(result >= -1, "Error detected (%d) when trying to iterate through region.",result);
+
   bam_plp_push(buf,0);
   while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != 0){
     if(pos<start-1) continue;
@@ -465,6 +468,9 @@ int process_bam_region(char *input_file, bw_func_reg pileup_func, tmpstruct_t *t
     }
 
   }
+
+  check(result >= -1, "Error detected (%d) when trying to iterate through region.",result);
+  
   bam_plp_push(buf,0);
 
   while ((plp = bam_plp_next(buf, &tid, &pos, &n_plp)) != NULL){
