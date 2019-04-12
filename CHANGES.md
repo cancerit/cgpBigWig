@@ -1,5 +1,9 @@
 # CHANGES
 
+## 1.0.4
+
+* Add checks to sam_iter_next to ensure result is checked for errors
+
 ## 1.0.3
 
 ### Behaviour change
