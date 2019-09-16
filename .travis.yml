@@ -13,7 +13,7 @@ script:
  - docker build -t cgpbigwig .
  - docker images | grep -c cgpbigwig
  - echo 'Verify program(s) from this repo'
- - bam2bedgraph
+ - docker run -t --rm cgpbigwig bam2bedgraph --version
  - docker run -t --rm cgpbigwig bwjoin --version
  - docker run -t --rm cgpbigwig bam2bw --version
  - docker run -t --rm cgpbigwig bwcat --version
