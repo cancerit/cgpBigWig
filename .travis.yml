@@ -2,46 +2,21 @@ notifications:
   slack: wtsi-cgpit:ptUMR1tkNyZJYd9TpGoss8WR
   email: false
 
-env:
-  - CC=gcc
+sudo: false
 
-language:
-  - c
-
-dist: trusty
-
-addons:
-  apt:
-    packages:
-      - build-essential
-      - curl
-      - libcurl4-openssl-dev
-      - libssl-dev
-      - nettle-dev
-      - zlib1g-dev
-      - libbz2-dev
-      - liblzma-dev
-
-install: true
+services:
+  - docker
 
 script:
-  - ./setup.sh ~/wtsi-opt
-
-matrix:
-  include:
-    - #Trusty
-      compiler: gcc
-      os: linux
-      sudo: required
-    - #Trusty
-      compiler: clang
-      os: linux
-      sudo: required
-    - dist: precise
-      compiler: gcc
-      os: linux
-      sudo: required
-    - dist: precise
-      compiler: clang
-      os: linux
-      sudo: required
+ - set -e
+ - echo 'Build and check docker image'
+ - docker build -t cgpbigwig .
+ - docker images | grep -c cgpbigwig
+ - echo 'Verify program(s) from this repo'
+ - bam2bedgraph
+ - docker run -t --rm cgpbigwig bwjoin --version
+ - docker run -t --rm cgpbigwig bam2bw --version
+ - docker run -t --rm cgpbigwig bwcat --version
+ - docker run -t --rm cgpbigwig bam2bwbases --version
+ - docker run -t --rm cgpbigwig bg2bw --version
+ - docker run -t --rm cgpbigwig detectExtremeDepth --version
