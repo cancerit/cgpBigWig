@@ -1,6 +1,6 @@
 # CHANGES
 
-## NEXT
+## 1.1.0
 
 Add docker build to allow internal large CI system to process. dockstore-cgpbigwig will
 be modified to base from here and only contain additional helpers and CWL.
