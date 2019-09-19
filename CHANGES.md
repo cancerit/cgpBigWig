@@ -1,5 +1,10 @@
 # CHANGES
 
+## NEXT
+
+Add docker build to allow internal large CI system to process. dockstore-cgpbigwig will
+be modified to base from here and only contain additional helpers and CWL.
+
 ## 1.0.4
 
 * Add checks to sam_iter_next to ensure result is checked for errors
@@ -14,7 +19,7 @@
 * Where a proper pair filter is used, now check for the correct paired-end orientation of F/R.
 * If this is not met the read is ignored
 * Added a -f filter of flags to **include** alongside the existing -F for exclude as per samtools style filtering for `bam2bw`, `bam2bwbases` and `bam2bedgraph`
-* **NB this flag was used as the exclude in `bam2bedgraph`. The flags have now been switched.** 
+* **NB this flag was used as the exclude in `bam2bedgraph`. The flags have now been switched.**
 
 ## 1.0.2
 
