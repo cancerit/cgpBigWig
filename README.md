@@ -2,22 +2,24 @@
 
 Package of C scripts for generation of [BigWig][BigWig] coverage files
 
+[![Quay Badge][quay-status]][quay-repo]
+
 | Master                                        | Dev                                          |
 |-----------------------------------------------|----------------------------------------------|
 | [![Master Badge][travis-master]][travis-base] |  [![Dev Badge][travis-develop]][travis-base] |
 
 <!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
-- [Installation](#installation)
-- [Docker and Singularity](#docker-and-singularity)
-- [Programs](#programs)
-	- [bwcat](#bwcat)
-	- [bwjoin](#bwjoin)
-	- [bam2bw](#bam2bw)
-	- [bg2bw](#bg2bw)
-	- [bam2bwbases](#bam2bwbases)
-	- [bam2bedgraph](#bam2bedgraph)
-- [License](#license)
+* [Installation](#installation)
+* [Docker and Singularity](#docker-and-singularity)
+* [Programs](#programs)
+	* [bwcat](#bwcat)
+	* [bwjoin](#bwjoin)
+	* [bam2bw](#bam2bw)
+	* [bg2bw](#bg2bw)
+	* [bam2bwbases](#bam2bwbases)
+	* [bam2bedgraph](#bam2bedgraph)
+* [License](#license)
 
 <!-- /TOC -->
 
@@ -37,6 +39,8 @@ To install this package run:
 :warning: Please review the respective licence for each before use.
 
 ## Docker and Singularity
+
+A docker image for this tool can be found at [quay.io][quay-repo] (this may be more current than the dockstore version).
 
 There are [docker][quay.io] and [dockstore.org][dockstore] wrappers for this project at [dockstore-cgpbigwig] including CWL bindings.
 
@@ -204,3 +208,8 @@ identical to a statement that reads ‘Copyright (c) 2005, 2006, 2007, 2008,
 [travis-master]: https://travis-ci.org/cancerit/cgpBigWig.svg?branch=master
 [travis-develop]: https://travis-ci.org/cancerit/cgpBigWig.svg?branch=develop
 [travis-base]: https://travis-ci.org/cancerit/cgpBigWig
+
+<!-- Quay.io -->
+[quay-status]: https://quay.io/repository/wtsicgp/cgpbigwig/status
+[quay-repo]: https://quay.io/repository/wtsicgp/cgpbigwig
+[quay-builds]: https://quay.io/repository/wtsicgp/cgpbigwig?tab=builds
