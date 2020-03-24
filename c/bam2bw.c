@@ -57,6 +57,8 @@ uint8_t is_overlap = 0;
 int include_zeroes = 0;
 uint32_t single = 1;
 char *last_contig = "";
+float scale = 1;
+float scale_log10 = 0;
 
 void print_usage (int exit_code){
 	printf("Usage: bam2bw -i input.[b|cr]am -o output.bw\n");
@@ -66,16 +68,17 @@ void print_usage (int exit_code){
   printf("-f  --filter-include [int]                        SAM flags to include. [default: %d]\n",filterinc);
   printf("                                                  N.B. if properly paired reads are filtered for inclusion bam2bw will assume paired-end data\n");
   printf("                                                  and exclude any proper-pair flagged reads not in F/R orientation.");
+
 	printf("-o  --outfile [file]                              Path to the output .bw file produced. [default:'%s']\n\n",out_file);
 	printf("Optional: \n");
-	printf("-c  --region [file]                               A samtools style region (contig:start-stop) or a bed file of regions over which to produce the bigwig file\n");
+	printf("-S  --scale-log10 [float]                         A scale factor to multiply to output [default: %d]\n", scale_log10);
+  printf("-c  --region [file]                               A samtools style region (contig:start-stop) or a bed file of regions over which to produce the bigwig file\n");
 	printf("-z  --include-zeroes                              Include zero coverage regions as additional entries to the bw file\n");
 	printf("-r  --reference [file]                            Path to reference genome.fa file (required for cram if ref_path cannot be resolved)\n");
 	printf("-a  --overlap                                     Use overlapping read check\n\n");
   printf ("Other:\n");
 	printf("-h  --help                                        Display this usage information.\n");
 	printf("-v  --version                                     Prints the version number.\n\n");
-
   exit(exit_code);
 }
 
@@ -97,6 +100,14 @@ int get_int_length(int input){
   return (input == 0 ? 1 : (int)(log10(input)+1));
 }
 
+
+static float _rescale( float cvg, float scale){
+    cvg = cvg*scale;
+//     fprintf(stderr,"[scale],%f\n",cvg);
+//     for (i=0;i<n;i++) values[i] *= scale;
+    return cvg;
+}
+
 void setup_options(int argc, char *argv[]){
 	const struct option long_opts[] =
 	{
@@ -109,6 +120,7 @@ void setup_options(int argc, char *argv[]){
              	{"include-zeroes",no_argument, 0, 'z'},
 							{"overlap", no_argument, 0, 'a'},
              	{"help", no_argument, 0, 'h'},
+              {"scale-log10", required_argument, 0, 'S'},
              	{"version", no_argument, 0, 'v'},
              	{ NULL, 0, NULL, 0}
 
@@ -118,7 +130,7 @@ void setup_options(int argc, char *argv[]){
    int iarg = 0;
 
    //Iterate through options
-   while((iarg = getopt_long(argc, argv, "F:f:i:o:c:r:azhv",long_opts, &index)) != -1){
+   while((iarg = getopt_long(argc, argv, "S:F:f:i:o:c:r:azhv",long_opts, &index)) != -1){
     switch(iarg){
       case 'F':
         if(sscanf(optarg, "%i", &filter) != 1){
@@ -132,6 +144,14 @@ void setup_options(int argc, char *argv[]){
       		print_usage(1);
       	}
         break;
+      case 'S':
+       if(sscanf(optarg, "%f", &scale_log10) != 1){
+        fprintf(stderr,"Error parsing -S|--scale-log10 argument '%s'. Should be an float.",optarg);
+          print_usage(1);
+        }
+       scale = pow(10., scale_log10);
+       fprintf(stderr,"[scale_factor],%E\n",scale);
+       break;       
    		case 'i':
 				input_file = optarg;
 				if(check_exist(input_file) != 1){
@@ -206,6 +226,7 @@ static int pileup_func(uint32_t tid, uint32_t position, int n, const bam_pileup1
       uint32_t start =  tmp->lstart;
       uint32_t stop = pos;
       float cvg = (float)tmp->lcoverage;
+      cvg = _rescale(cvg,scale);
 			if(tmp->lcoverage == 0 && tmp->ltid != tid-1 && tmp->ltid != tid){
 				tmp->ltid = tid;
 			}
@@ -265,6 +286,8 @@ static int pileup_func_overlap(uint32_t tid, uint32_t position, int n, const bam
       uint32_t start =  tmp->lstart;
       uint32_t stop = pos;
       float cvg = (float)tmp->lcoverage;
+      cvg = _rescale(cvg,scale);
+
 			if(tmp->lcoverage == 0 && tmp->ltid != tid-1 && tmp->ltid != tid){
 				tmp->ltid = tid;
 			}
@@ -475,6 +498,7 @@ int main(int argc, char *argv[]){
 	  start =  tmp.lstart;
     stop = tmp.lpos+1;
     cvg = tmp.lcoverage;
+    cvg = _rescale(cvg,scale);
     if(start>0) {
       chck = bwAddIntervals(tmp.bwout,&tmp.head->target_name[tmp.ltid],&start,&stop,&cvg,single);
       check(chck==0,"Error adding bw interval %s:%"PRIu32"-%"PRIu32". TID: %d Error code: %d\n",tmp.head->target_name[tmp.ltid],start,stop,tmp.ltid,chck);
