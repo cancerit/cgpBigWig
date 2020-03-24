@@ -211,3 +211,18 @@ then
 fi
 
 rm -f ../test_data/tmp.out ../test_data/expected.tmp.out ../test_data/tmp.bw
+
+
+
+../bin/bam2bw -S 1 -i ../test_data/test.bam -o ../test_data/tmp.bw;
+../bin/bwcat -i ../test_data/tmp.bw > ../test_data/tmp.out
+
+
+diff ../test_data/tmp.out ../test_data/test_bw_out_logs1_expected.txt
+if [ "$?" != "0" ];
+then
+  echo "ERROR in "$0": Total file comparisons don't match"
+  echo "------"
+  rm -f ../test_data/tmp.out ../test_data/expected.tmp.out
+  exit 1
+fi

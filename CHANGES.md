@@ -1,5 +1,10 @@
 # CHANGES
 
+## NEXT RELEASE
+
+Add bam2bw -S/--scale-log10 to enable simple RPKM rescaling.
+Thanks to @shouldsee for these modifications.
+
 ## 1.1.0
 
 Add docker build to allow internal large CI system to process. dockstore-cgpbigwig will
