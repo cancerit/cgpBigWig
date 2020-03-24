@@ -97,13 +97,16 @@ bam2bw can be used to generate a bw file of coverage from a [cr|b]am file.
 
 -i  --input [file]                                Path to the input [b|cr]am file.
 -F  --filter [int]                                SAM flags to filter. [default: 4]
--o  --outfile [file]                              Path to the output .bw file produced. [default:'output.bam.bw']
+-f  --filter-include [int]                        SAM flags to include. [default: 0]
+                                                  N.B. if properly paired reads are filtered for inclusion bam2bw will assume paired-end data
+                                                  and exclude any proper-pair flagged reads not in F/R orientation.-o  --outfile [file]                              Path to the output .bw file produced. [default:'output.bam.bw']
 
 Optional:
+-S  --scale-log10 [float]                         A scale factor to multiply to output [default: -1912244352]
 -c  --region [file]                               A samtools style region (contig:start-stop) or a bed file of regions over which to produce the bigwig file
 -z  --include-zeroes                              Include zero coverage regions as additional entries to the bw file
 -r  --reference [file]                            Path to reference genome.fa file (required for cram if ref_path cannot be resolved)
--a  --overlap                                     Turn on overlaping reads check
+-a  --overlap                                     Use overlapping read check
 
 Other:
 -h  --help                                        Display this usage information.
