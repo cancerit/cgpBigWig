@@ -1,8 +1,9 @@
 # CHANGES
 
-## 1.1.0-shouldsee
+## NEXT RELEASE
 
 Add bam2bw -S/--scale-log10 to enable simple RPKM rescaling.
+Thanks to @shouldsee for these modifications.
 
 ## 1.1.0
 
