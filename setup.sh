@@ -34,7 +34,7 @@
 
 # ALL tool versions used by opt-build.sh
 # need to keep in sync with Dockerfile
-export VER_HTSLIB="1.9"
+export VER_HTSLIB="1.10"
 export VER_LIBBW="0.4.2"
 
 if [[ ($# -ne 1 && $# -ne 2) ]] ; then

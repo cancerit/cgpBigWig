@@ -4,7 +4,7 @@ USER  root
 
 # ALL tool versions used by opt-build.sh
 # need to keep in sync with setup.sh
-ARG VER_HTSLIB="1.9"
+ARG VER_HTSLIB="1.10"
 ARG VER_LIBBW="0.4.2"
 
 ENV OPT /opt/wtsi-cgp
