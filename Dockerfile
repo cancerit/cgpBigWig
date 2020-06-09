@@ -2,6 +2,8 @@ FROM  ubuntu:16.04 as builder
 
 USER  root
 
+# ALL tool versions used by opt-build.sh
+# need to keep in sync with setup.sh
 ARG VER_HTSLIB="1.9"
 ARG VER_LIBBW="0.4.2"
 
