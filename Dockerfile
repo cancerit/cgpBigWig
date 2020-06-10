@@ -62,6 +62,7 @@ bzip2 \
 zlib1g \
 liblzma5 \
 libncurses5 \
+libcurl3-gnutls \
 unattended-upgrades && \
 unattended-upgrade -d -v && \
 apt-get remove -yq unattended-upgrades && \
