@@ -64,7 +64,7 @@ void print_usage (int exit_code){
   printf("-f  --filter-include [int]                        SAM flags to include. [default: %d]\n",filterinc);
   printf("                                                  N.B. if properly paired reads are filtered for inclusion bam2bw will assume paired-end data\n");
   printf("                                                  and exclude any proper-pair flagged reads not in F/R orientation.");
-	printf("-o  --outfile [file]                              Path to the output .bw file produced. Per base results wiillbe output as four bw files [ACGT].outputname.bw [default:'%s']\n\n",out_file);
+	printf("-o  --outfile [file]                              Path to the output .bw file produced. Per base results will be output as four bw files [ACGT].outputname.bw [default:'%s']\n\n",out_file);
 	printf("Optional: \n");
 	printf("-c  --region [file]                               A samtools style region (contig:start-stop) or a bed file of regions over which to produce the bigwig file\n");
 	printf("-r  --reference [file]                            Path to reference genome.fa file (required for cram if ref_path cannot be resolved)\n");
