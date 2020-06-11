@@ -1,8 +1,10 @@
-FROM  ubuntu:16.04 as builder
+FROM  ubuntu:20.04 as builder
 
 USER  root
 
-ARG VER_HTSLIB="1.9"
+# ALL tool versions used by opt-build.sh
+# need to keep in sync with setup.sh
+ARG VER_HTSLIB="1.10.2"
 ARG VER_LIBBW="0.4.2"
 
 ENV OPT /opt/wtsi-cgp
@@ -11,24 +13,23 @@ ENV LD_LIBRARY_PATH $OPT/lib
 ENV LC_ALL C
 
 RUN apt-get -yq update
-RUN apt-get install -yq --no-install-recommends\
-  build-essential\
-  apt-transport-https\
-  curl\
-  ca-certificates\
-  make\
-  bzip2\
-  gcc\
-  libtasn1-dev\
-  libgnutls-dev\
-  nettle-dev\
-  libgmp-dev\
-  libp11-kit-dev\
-  zlib1g-dev\
-  libbz2-dev\
-  liblzma-dev\
-  libcurl4-gnutls-dev\
-  libncurses5-dev
+RUN apt-get install -yq --no-install-recommends build-essential
+RUN apt-get install -yq --no-install-recommends apt-transport-https
+RUN apt-get install -yq --no-install-recommends curl
+RUN apt-get install -yq --no-install-recommends ca-certificates
+RUN apt-get install -yq --no-install-recommends make
+RUN apt-get install -yq --no-install-recommends bzip2
+RUN apt-get install -yq --no-install-recommends gcc
+RUN apt-get install -yq --no-install-recommends libtasn1-dev
+RUN apt-get install -yq --no-install-recommends nettle-dev
+RUN apt-get install -yq --no-install-recommends libgmp-dev
+RUN apt-get install -yq --no-install-recommends libp11-kit-dev
+RUN apt-get install -yq --no-install-recommends zlib1g-dev
+RUN apt-get install -yq --no-install-recommends libbz2-dev
+RUN apt-get install -yq --no-install-recommends liblzma-dev
+RUN apt-get install -yq --no-install-recommends libcurl4-gnutls-dev
+RUN apt-get install -yq --no-install-recommends libncurses5-dev
+RUN apt-get install -yq --no-install-recommends libgnutls28-dev
 
 RUN mkdir -p $OPT/bin
 
@@ -40,11 +41,11 @@ RUN bash build/opt-build.sh $OPT
 COPY . .
 RUN bash build/opt-build-local.sh $OPT
 
-FROM  ubuntu:16.04
+FROM  ubuntu:20.04
 
 LABEL maintainer="cgphelp@sanger.ac.uk"\
       uk.ac.sanger.cgp="Cancer, Ageing and Somatic Mutation, Wellcome Sanger Institute" \
-      version="1.2.0" \
+      version="1.3.0" \
       description="cgpBigWig"
 
 ENV OPT /opt/wtsi-cgp
@@ -61,6 +62,7 @@ bzip2 \
 zlib1g \
 liblzma5 \
 libncurses5 \
+libcurl3-gnutls \
 unattended-upgrades && \
 unattended-upgrade -d -v && \
 apt-get remove -yq unattended-upgrades && \

@@ -1,5 +1,13 @@
 # CHANGES
 
+## 1.3.0
+
+* Update to htslib 1.10.2
+  * Required for PCAP-core to update to samtools 1.10 for new features
+* Update `setup.sh` to exec `build/*` scripts to reduce chance of divergence
+* Update Docker image to Ubuntu Focal (20.04) base.
+* Fix #33 (typo)
+
 ## 1.2.0
 
 Add bam2bw -S/--scale-log10 to enable simple RPKM rescaling.
