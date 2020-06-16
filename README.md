@@ -167,6 +167,11 @@ Other:
 -v --version   Prints the version number.
 ```
 
+## Contributors
+
+Thanks to the following contributors on `dockstore-cgpbigwig` which is now retired
+[Michael R. Crusoe](https://github.com/mr-c)
+
 ## License
 ```
 Copyright (c) 2017-2018 Genome Research Ltd.
