@@ -7,17 +7,17 @@ id: "cgpbigwig-bam2bw"
 label: "cgpBigWig bam2bw flow"
 
 doc: |
-  ![build_status](https://quay.io/repository/wtsicgp/dockstore-cgpbigwig/status)
+  ![build_status](https://quay.io/repository/wtsicgp/cgpBigWig/status)
 
   A wrapper for the cgpBigWig bam2bw tool.
 
   bam2bw documentation can be found [here](https://github.com/cancerit/cgpBigWig#bam2bw)
 
   In order to run the example found in `example/bam2bw.json` please download the relevant reference files
-  listed in the [`README`](https://github.com/cancerit/cgpdockstore-cgpbigwig/README.md#Example_reference_files)
+  listed in the [`README`](https://github.com/cancerit/cgpcgpBigWig/README.md#Example_reference_files)
   and change the reference path in bam2bw.json
 
-  See the [dockstore-cgpbigwig](https://github.com/cancerit/dockstore-cgpbigwig)
+  See the [cgpBigWig](https://github.com/cancerit/cgpBigWig)
   website for more information about this wrapper.
 
   For queries relating to the underlying software see [cgpBigWig](https://github.com/cancerit/cgpBigWig).
@@ -26,7 +26,7 @@ baseCommand: bam2bw
 
 requirements:
   - class: DockerRequirement
-    dockerPull: "quay.io/wtsicgp/dockstore-cgpbigwig:3.0.1"
+    dockerPull: "quay.io/wtsicgp/cgpBigWig:1.3.0"
   - class: InlineJavascriptRequirement
 
 inputs:
@@ -78,7 +78,7 @@ $namespaces:
   s: http://schema.org/
 
 
-s:codeRepository: https://github.com/cancerit/dockstore-cgpbigwig
+s:codeRepository: https://github.com/cancerit/cgpBigWig
 s:license: https://spdx.org/licenses/AGPL-3.0-only
 
 s:author:

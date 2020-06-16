@@ -1,16 +1,16 @@
 #!/usr/bin/env cwl-runner
 
 doc: |
-  ![build_status](https://quay.io/repository/wtsicgp/dockstore-cgpbigwig/status)
+  ![build_status](https://quay.io/repository/wtsicgp/cgpBigWig/status)
 
   A wrapper for the cgpBigWig bg2bw tool.
 
   bg2bw documentation can be found [here](https://github.com/cancerit/cgpBigWig#bg2bw)
 
   In order to run the example found in `example/bg2bw.json` please download the relevant reference files
-  listed in the [`README`](https://github.com/cancerit/cgpdockstore-cgpbigwig/README.md#Example_reference_files)
+  listed in the [`README`](https://github.com/cancerit/cgpcgpBigWig/README.md#Example_reference_files)
 
-  See the [dockstore-cgpbigwig](https://github.com/cancerit/dockstore-cgpbigwig)
+  See the [cgpBigWig](https://github.com/cancerit/cgpBigWig)
   website for more information about this wrapper.
 
   For queries relating to the underlying software see [cgpBigWig](https://github.com/cancerit/cgpBigWig).
@@ -26,7 +26,7 @@ baseCommand: bg2bw
 
 requirements:
   - class: DockerRequirement
-    dockerPull: "quay.io/wtsicgp/dockstore-cgpbigwig:3.0.1"
+    dockerPull: "quay.io/wtsicgp/cgpBigWig:1.3.0"
 
 inputs:
   input_path:
@@ -51,7 +51,7 @@ $schemas:
 $namespaces:
   s: http://schema.org/
 
-s:codeRepository: https://github.com/cancerit/dockstore-cgpbigwig
+s:codeRepository: https://github.com/cancerit/cgpBigWig
 s:license: https://spdx.org/licenses/GPL-3.0
 
 s:author:
