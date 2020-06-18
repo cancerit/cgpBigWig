@@ -1,7 +1,7 @@
 #!/usr/bin/env cwl-runner
 
 doc: |
-  ![build_status](https://quay.io/repository/wtsicgp/cgpBigWig/status)
+  ![build_status](https://quay.io/repository/wtsicgp/cgpbigwig/status)
 
   A wrapper for the cgpBigWig bam2bwbases tool.
 
@@ -27,7 +27,7 @@ baseCommand: bam2bwbases
 
 requirements:
   - class: DockerRequirement
-    dockerPull: "quay.io/wtsicgp/cgpBigWig:1.3.0"
+    dockerPull: "quay.io/wtsicgp/cgpbigwig:1.3.0"
 inputs:
   input_path:
     type: File
@@ -74,8 +74,3 @@ s:author:
     s:identifier: https://orcid.org/0000-0002-0407-0386
     s:email: mailto:drj@sanger.ac.uk
     s:name: David Jones
-
-dct:creator:
-  "@id": "https://orcid.org/0000-0002-0407-0386"
-  foaf:name: David Jones
-  foaf:mbox: "drj@sanger.ac.uk"
