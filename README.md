@@ -42,9 +42,7 @@ To install this package run:
 
 A docker image for this tool can be found at [quay.io][quay-repo] (this may be more current than the dockstore version).
 
-There are [docker][quay.io] and [dockstore.org][dockstore] wrappers for this project at [dockstore-cgpbigwig] including CWL bindings.
-
-See the [dockstore-cgpbigwig] documentation for more detail.
+There are [docker][quay.io] and [dockstore.org][dockstore] containers for this project (including CWL bindings).
 
 ## Programs
 
@@ -167,6 +165,11 @@ Other:
 -v --version   Prints the version number.
 ```
 
+## Contributors
+
+Thanks to the following contributors on `dockstore-cgpbigwig` which is now retired
+[Michael R. Crusoe](https://github.com/mr-c)
+
 ## License
 ```
 Copyright (c) 2017-2018 Genome Research Ltd.
@@ -204,8 +207,8 @@ identical to a statement that reads ‘Copyright (c) 2005, 2006, 2007, 2008,
 [BigWig]: https://genome.ucsc.edu/goldenpath/help/bigWig.html
 [htslib]: https://github.com/samtools/htslib
 [dockstore]: https://dockstore.org/tools
-[quay.io]: https://quay.io/repository/wtsicgp/dockstore-cgpbigwig
-[dockstore-cgpbigwig]: https://github.com/cancerit/dockstore-cgpbigwig/
+[quay.io]: https://quay.io/repository/wtsicgp/cgpbigwig
+[dockstore-cgpbigwig]: https://github.com/cancerit/cgpbigwig/
 
 <!-- Travis links -->
 [travis-master]: https://travis-ci.org/cancerit/cgpBigWig.svg?branch=master

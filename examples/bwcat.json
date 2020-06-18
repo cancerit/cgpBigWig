@@ -1,0 +1,6 @@
+{
+  "input_path": {
+    "path": "https://raw.githubusercontent.com/cancerit/cgpBigWig/master/test_data/test.bw",
+    "class": "File"
+  }
+}
