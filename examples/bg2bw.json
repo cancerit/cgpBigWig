@@ -1,0 +1,11 @@
+{
+  "input_path": {
+    "path": "https://raw.githubusercontent.com/cancerit/cgpBigWig/master/test_data/coverage.region.expected.bed",
+    "class": "File"
+  },
+
+  "chrom_list": {
+    "path": "/your/path/to/reference/genome.fa.fai",
+    "class": "File"
+  }
+}

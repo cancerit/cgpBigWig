@@ -1,5 +1,9 @@
 # CHANGES
 
+## NEXT
+
+* Move cwl and examples into core cgpBigWig respository
+
 ## 1.3.0
 
 * Update to htslib 1.10.2
