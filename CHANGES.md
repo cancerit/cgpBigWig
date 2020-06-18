@@ -1,6 +1,6 @@
 # CHANGES
 
-## NEXT
+## 1.4.0
 
 * Move cwl and examples into core cgpBigWig respository
 
