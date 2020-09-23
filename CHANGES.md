@@ -1,5 +1,10 @@
 # CHANGES
 
+## 1.5.0
+
+* Update to [htslib 1.11](https://github.com/samtools/htslib/releases/tag/1.11)
+* Update to [libBigWig 0.4.4](https://github.com/dpryan79/libBigWig/releases/tag/0.4.4)
+
 ## 1.4.0
 
 * Move cwl and examples into core cgpBigWig respository
