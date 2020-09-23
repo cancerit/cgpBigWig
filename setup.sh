@@ -34,8 +34,8 @@
 
 # ALL tool versions used by opt-build.sh
 # need to keep in sync with Dockerfile
-export VER_HTSLIB="1.10.2"
-export VER_LIBBW="0.4.2"
+export VER_HTSLIB="1.11"
+export VER_LIBBW="0.4.4"
 
 if [[ ($# -ne 1 && $# -ne 2) ]] ; then
   echo "Please provide an installation path and optionally perl lib paths to allow, e.g."
