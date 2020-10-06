@@ -52,6 +52,19 @@ set -u
 
 ##### DEPS for cgpBigWig #####
 
+## libdeflate
+if [ ! -e $SETUP_DIR/libdeflate.success ]; then
+  rm -rf tmp_deflate
+  mkdir -p tmp_deflate
+  curl -sSL --retry 10 https://github.com/ebiggers/libdeflate/archive/${VER_LIBDEFLATE}.tar.gz > distro.tar.gz
+  tar --strip-components 1 -C tmp_deflate -zxf distro.tar.gz
+  cd tmp_deflate
+  PREFIX=$INST_PATH make -j$CPU CFLAGS="-fPIC -O3" install
+  cd ../
+  rm -rf distro.* tmp_deflate
+  touch $SETUP_DIR/libdeflate.success
+fi
+
 ## HTSLIB (tar.bz2)
 if [ ! -e $SETUP_DIR/htslib.success ]; then
   rm -rf htslib
@@ -59,7 +72,10 @@ if [ ! -e $SETUP_DIR/htslib.success ]; then
   curl -sSL --retry 10 https://github.com/samtools/htslib/releases/download/${VER_HTSLIB}/htslib-${VER_HTSLIB}.tar.bz2 > distro.tar.bz2
   tar --strip-components 1 -C htslib -jxf distro.tar.bz2
   cd htslib
-  ./configure --enable-plugins --enable-libcurl --prefix=$INST_PATH
+  ./configure --enable-plugins --enable-libcurl --prefix=$INST_PATH \
+    --with-libdeflate \
+    CPPFLAGS="-I$INST_PATH/include" \
+    LDFLAGS="-L${INST_PATH}/lib -Wl,-R${INST_PATH}/lib"
   make clean
   make -j$CPU
   make install
