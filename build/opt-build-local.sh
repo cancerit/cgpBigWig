@@ -46,6 +46,7 @@ export MANPATH=`echo $INST_PATH/man:$INST_PATH/share/man:$MANPATH | perl -pe 's/
 set -u
 
 ##### cgpBigWig installation
+export LFLAGS="-L${INST_PATH}/lib"
 make -C c clean
 make -C c -j$CPU prefix=$INST_PATH HTSLIB=$INST_PATH/lib
 cp bin/bam2bedgraph $INST_PATH/bin/.
