@@ -33,6 +33,7 @@
 #include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "bigWig.h"
 #include "utils.h"
 #include "dbg.h"
@@ -118,6 +119,40 @@ void setup_options(int argc, char *argv[]){
   return;
 }
 
+int contig_order(char* ctg, char **prev_ctg, int64_t *prev_ctg_idx, chromList_t *chrlist){
+    //If prev_ctg_idx is as yet unset
+    int64_t i = 0;
+    if (*prev_ctg == NULL){
+        for (i=0; i<chrlist->nKeys; i++){
+            if(strcmp(ctg,chrlist->chrom[i])==0){
+                *prev_ctg_idx = i;
+                *prev_ctg = malloc((strlen(ctg)+1) * sizeof(char));
+                strcpy(*prev_ctg, ctg);
+                return 0;
+            }
+        }
+    }// end of if the prev_ctg_idx is as yet unset
+
+    //contigs match, we don't worry
+    if(strcmp(ctg,*prev_ctg)==0) return 0;
+
+    //contigs don't match, so ensure we're at a new contig further 'down' the list.
+    i = 0;
+    for (i=0; i<chrlist->nKeys; i++){
+        if(strcmp(ctg,chrlist->chrom[i])==0){
+            if(i > *prev_ctg_idx){
+                *prev_ctg_idx = i;
+                *prev_ctg = malloc((strlen(ctg)+1) * sizeof(char));
+                strcpy(*prev_ctg, ctg);
+                return 0;
+            }else{
+                return -1;
+            }
+        };
+    }
+    return -1;
+}
+
 chromList_t *parse_chrom_list(char *chrom_list_file){
   chromList_t *cl = NULL;
   FILE *in = NULL;
@@ -185,10 +220,13 @@ int main(int argc, char *argv[]){
   ctg = malloc(sizeof(char) * 2048);
   uint32_t start;
   uint32_t stop;
+  char *prev_ctg = NULL;
+  int64_t prev_ctg_idx = fp->cl->nKeys + 1;
   float res;
   while(fgets(line,sizeof(line),in)){
     num = sscanf(line,"%[^\t]\t%"SCNu32"\t%"SCNu32"\t%f\n",ctg,&start,&stop,&res);
     check(num==4,"Error parsing bed line '%s' to bw format.",line);
+    check(contig_order(ctg, &prev_ctg, &prev_ctg_idx, fp->cl)==0, "Error in contig order at '%s'. chrom list should be the same order as the input bed file.",ctg);
     chk = bwAddIntervals(fp, &ctg, &start, &stop, &res, 1);
     check(chk==0,"Error encountered adding bed line '%s' to bw file: %d.",line,chk);
   }
