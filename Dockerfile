@@ -4,8 +4,8 @@ USER  root
 
 # ALL tool versions used by opt-build.sh
 # need to keep in sync with setup.sh
-ARG VER_HTSLIB="1.11"
-ARG VER_LIBBW="0.4.4"
+ARG VER_HTSLIB="1.12"
+ARG VER_LIBBW="0.4.6"
 ARG VER_LIBDEFLATE="v1.6"
 
 ENV OPT /opt/wtsi-cgp
@@ -46,7 +46,6 @@ FROM  ubuntu:20.04
 
 LABEL maintainer="cgphelp@sanger.ac.uk"\
       uk.ac.sanger.cgp="Cancer, Ageing and Somatic Mutation, Wellcome Sanger Institute" \
-      version="1.5.2" \
       description="cgpBigWig"
 
 ENV OPT /opt/wtsi-cgp

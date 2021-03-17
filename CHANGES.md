@@ -1,5 +1,10 @@
 # CHANGES
 
+## 1.6.0
+
+* Update to [htslib 1.12](https://github.com/samtools/htslib/releases/tag/1.12)
+* Update to [libBigWig 0.4.6](https://github.com/dpryan79/libBigWig/releases/tag/0.4.6)
+
 ## 1.5.0
 
 * Update to [htslib 1.11](https://github.com/samtools/htslib/releases/tag/1.11)

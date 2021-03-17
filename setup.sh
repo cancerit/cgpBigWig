@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ########## LICENSE ##########
-# Copyright (c) 2016-2020 Genome Research Ltd.
+# Copyright (c) 2016-2021 Genome Research Ltd.
 #
 # Author: Cancer Genome Project cgphelp@sanger.ac.uk
 #
@@ -34,8 +34,8 @@
 
 # ALL tool versions used by opt-build.sh
 # need to keep in sync with Dockerfile
-export VER_HTSLIB="1.11"
-export VER_LIBBW="0.4.4"
+export VER_HTSLIB="1.12"
+export VER_LIBBW="0.4.6"
 export VER_LIBDEFLATE="v1.6"
 
 if [[ ($# -ne 1 && $# -ne 2) ]] ; then
