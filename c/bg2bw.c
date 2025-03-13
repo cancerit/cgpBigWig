@@ -180,7 +180,7 @@ chromList_t *parse_chrom_list(char *chrom_list_file){
   }
   check(chr_count==ln_count,"Error contigs found %d != line_count %d",chr_count,ln_count);
   fclose(in);
-  cl = bwCreateChromList(contigs, lengths, chr_count);
+  cl = bwCreateChromList((const char* const*)contigs, lengths, chr_count);
   check(cl!=NULL,"Error creating ChromList.");
   return cl;
 
@@ -227,7 +227,7 @@ int main(int argc, char *argv[]){
     num = sscanf(line,"%[^\t]\t%"SCNu32"\t%"SCNu32"\t%f\n",ctg,&start,&stop,&res);
     check(num==4,"Error parsing bed line '%s' to bw format.",line);
     check(contig_order(ctg, &prev_ctg, &prev_ctg_idx, fp->cl)==0, "Error in contig order at '%s'. chrom list should be the same order as the input bed file.",ctg);
-    chk = bwAddIntervals(fp, &ctg, &start, &stop, &res, 1);
+    chk = bwAddIntervals(fp, (const char* const*)&ctg, &start, &stop, &res, 1);
     check(chk==0,"Error encountered adding bed line '%s' to bw file: %d.",line,chk);
   }
 
